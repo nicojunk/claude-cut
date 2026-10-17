@@ -1,0 +1,129 @@
+{
+ "kanal": "demo",
+ "titel": "Beispiel: Warum Training allein nicht reicht",
+ "nummer": 1,
+ "thema": "beispiel-training",
+ "hook": {
+  "clip": "aufnahme-01.mov",
+  "von": 12.4,
+  "bis": 16.9,
+  "vorlage": "40 Der eine Unterschied",
+  "satz": "Zwei Menschen trainieren gleich viel, aber nur einer sieht nach drei Monaten etwas.",
+  "quelle": "Anfang und Ende in gemessenen Pausen (naehte.py)"
+ },
+ "stuecke": [
+  {
+   "clip": "aufnahme-01.mov",
+   "von": 41.2,
+   "bis": 52.8,
+   "satz": "Der Unterschied ist nicht das Training. Es ist das, was danach passiert."
+  },
+  {
+   "clip": "aufnahme-01.mov",
+   "von": 60.1,
+   "bis": 74.6,
+   "satz": "Schlaf, Eiweiß und Pausen entscheiden, ob dein Körper das Training umsetzt."
+  }
+ ],
+ "nutzen_bei": "Der Unterschied",
+ "rollen": {
+  "key": [
+   "Unterschied",
+   "Schlaf",
+   "Eiweiß",
+   "Pausen"
+  ],
+  "accent": [
+   "nicht",
+   "danach"
+  ]
+ },
+ "takte": [
+  {
+   "bei": "Der Unterschied",
+   "zustand": "speaker",
+   "blitz": true,
+   "karte": {
+    "type": "title",
+    "zone": "top",
+    "icon": "check",
+    "text": "Der Unterschied"
+   },
+   "absprung": {
+    "stelle": "Lock-in",
+    "absprung": "nach dem Hook",
+    "regel": "Auflösung der Frage aus dem Hook",
+    "dopamin": true
+   }
+  },
+  {
+   "bei": "Schlaf",
+   "zustand": "split",
+   "karte": {
+    "type": "list",
+    "zone": "paper",
+    "title": "Was danach passiert",
+    "rows": [
+     {
+      "text": "Schlaf",
+      "at": "Schlaf"
+     },
+     {
+      "text": "Eiweiß",
+      "at": "Eiweiß"
+     },
+     {
+      "text": "Pausen",
+      "at": "Pausen"
+     }
+    ]
+   },
+   "absprung": {
+    "stelle": "Liste",
+    "absprung": "Mitte",
+    "regel": "Zeile für Zeile auf dem gesprochenen Wort",
+    "dopamin": true
+   }
+  }
+ ],
+ "varianten": {
+  "mit": {
+   "stuecke": [
+    {
+     "clip": "aufnahme-01.mov",
+     "von": 80.0,
+     "bis": 84.5,
+     "satz": "Schreib mir PLAN in die Kommentare."
+    }
+   ],
+   "aufruf": {
+    "bei": "Schreib",
+    "lead": "Kommentiere",
+    "keyword": "PLAN"
+   },
+   "takte": []
+  },
+  "ohne": {
+   "stuecke": [
+    {
+     "clip": "aufnahme-01.mov",
+     "von": 86.0,
+     "bis": 89.0,
+     "satz": "Folge mir für Teil 2."
+    }
+   ],
+   "aufruf": {
+    "bei": "Folge",
+    "lead": "Folge für",
+    "keyword": "TEIL 2"
+   },
+   "takte": []
+  }
+ },
+ "titelbild": {
+  "zeit": 13.0,
+  "zeile1": "Gleiches Training",
+  "zeile2": "anderes Ergebnis",
+  "vorlage": "40 Der eine Unterschied"
+ }
+}

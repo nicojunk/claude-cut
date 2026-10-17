@@ -1,0 +1,150 @@
+%FONTFACES%
+html, body { margin: 0; background: #1E2430; }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #1E2430; font-family: "MontserratHF"; }
+#spk, #spkz { position: absolute; inset: 0; }
+#spkz video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* split mode: paper with 60 px grid, opaque to y=%SEAM_SOLID%, soft seam to y=%SEAM_END% (measured) */
+.paper { position: absolute; left: 0; top: 0; width: 100%; height: %SEAM_END%px; z-index: 2;
+  background-color: %PAPER%;
+  background-image: linear-gradient(%GRID% 2px, transparent 2px), linear-gradient(90deg, %GRID% 2px, transparent 2px);
+  background-size: 60px 60px; background-position: %GRID_X0%px %GRID_Y0%px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 %SEAM_SOLID%px, transparent %SEAM_END%px);
+  mask-image: linear-gradient(to bottom, #000 %SEAM_SOLID%px, transparent %SEAM_END%px); }
+.broll { position: absolute; inset: 0; z-index: 3; overflow: hidden; background: #1E2430; }
+.broll .brz { position: absolute; inset: 0; }
+.broll img, .broll video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.brollv { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+.brollv .brz { position: absolute; inset: 0; }
+.brollv video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cardc { position: absolute; inset: 0; z-index: 5; }
+.capc { position: absolute; inset: 0; z-index: 6; }
+.flashc { position: absolute; inset: 0; z-index: 4; pointer-events: none; }   /* unter Karten (5) und Untertiteln (6): Schrift im Blitzabklingen wirkte verwaschen (Abnahme R2, 15.10.) */
+.flash { position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(circle at 38% 34%, #ffffff 0%, #fffaf2 45%, #FBF1E1 80%, #E3F5F3 100%); }
+.flash.mini { background: radial-gradient(circle at 30% 30%, #fff8ee 0%, rgba(255,228,190,.9) 55%, rgba(255,200,150,.6) 100%); }
+
+/* captions: 4 roles (style-spec §4) */
+.cap { position: absolute; left: 0; width: 100%; text-align: center; }
+.cap .w { display: inline-block; opacity: 0; }
+.cap.full { top: %CAP_FULL_TOP%px; color: #fff; text-shadow: 0 1px 3px rgba(30,36,48,.85), 0 3px 18px rgba(30,36,48,.75), 0 0 34px rgba(30,36,48,.45); }   /* R3 15.10.: Kontrast 2,84:1 < 3:1 */
+.cap.full .line { line-height: 1.0; font-family: "MontserratHF"; font-weight: 600; font-size: 54px; }
+.cap.full .base { font-family: "MontserratHF"; font-weight: 600; font-size: 54px; }
+.cap.full .hero { font-family: "CormorantHF"; font-weight: 700; font-size: 124px; letter-spacing: 0; }
+.cap.full .accent { font-family: "PlayfairHF"; font-style: italic; font-weight: 600; font-size: 70px; }
+.cap.full .key { font-family: "MontserratHF"; font-weight: 800; font-size: 92px; background: linear-gradient(135deg,#3FB8AF,#E3F5F3 50%,#52C7BE); color: #1E2430; border-radius: 16px; padding: 0 22px 6px; text-shadow: none; }
+.cap.full .line.pre { margin-bottom: -4px; }
+.cap.full .line.post { margin-top: 6px; padding-left: 160px; }
+.cap.split { top: calc(%CAP_SPLIT_CY%px - 44px); color: %INK%; padding: 0 60px; box-sizing: border-box; }
+.cap.split .line { line-height: 96px; font-family: "MontserratHF"; font-weight: 600; font-size: 58px; }
+.cap.split .base { font-family: "MontserratHF"; font-weight: 600; font-size: 58px; }
+.cap.split .hero { font-family: "CormorantHF"; font-weight: 700; font-size: 86px; }
+.cap.split .accent { font-family: "PlayfairHF"; font-style: italic; font-weight: 600; font-size: 66px; }
+.cap.split .key { font-family: "MontserratHF"; font-weight: 800; font-size: 70px; background: linear-gradient(135deg,#3FB8AF,#E3F5F3 50%,#52C7BE); color: #1E2430; border-radius: 12px; padding: 0 16px 4px; }
+
+/* cards (geometry measured on the reference at full resolution, style-spec §5) */
+.card-wrap { position: absolute; left: 0; width: 100%; display: flex; justify-content: center; }
+.card-wrap.z-top { top: 167px; }
+.card-wrap.z-paper { top: 103px; }
+.card { background: %CARD%; border-radius: 26px; box-shadow: 0 10px 34px rgba(0,0,0,.16); color: %INK%; }
+.ico { width: 1em; height: 1em; flex: none; }
+/* title card: 759 x 250 px for 2 lines in the reference */
+.card.title { padding: 30px 64px 34px; text-align: center; }
+.card.title .t1 { display: flex; align-items: center; justify-content: center; gap: 18px; font-weight: 600; font-size: 80px; line-height: 1.08; }
+.card.title .t1 .ico { font-size: 96px; }
+.card.title .t1 .num { color: #1E2430; font-weight: 800; }
+.card.title .t1 b:last-child { font-weight: 600; }
+.card.title .t2 { font-family: "PlayfairHF"; font-style: italic; font-size: 66px; line-height: 1.1; color: %INK%; margin-top: 8px; }
+/* section chip: 145 px high, red circle 118 px with a fading ring */
+.chip { position: relative; display: flex; align-items: center; background: #fff; border-radius: 80px; box-shadow: 0 8px 26px rgba(0,0,0,.18); padding: 13px 54px 13px 13px; margin-top: 55px; }
+.chip .n { position: relative; width: 118px; height: 118px; border-radius: 50%; background: #1E2430; color: #A8E2DD; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 72px; }
+.chip .ring { position: absolute; left: 13px; top: 13px; width: 118px; height: 118px; border-radius: 50%; border: 3px solid %RED%; opacity: 0; }
+.chip .pill { display: block; }
+.chip .txt { display: block; font-weight: 800; font-size: 86px; line-height: 1; color: %INK%; padding-left: 26px; white-space: nowrap; }
+/* list card on paper: 880 px wide, header 80 px, rows 54 px bold, icons in pale red circles */
+.card.list { width: 880px; box-sizing: border-box; padding: 30px 36px 18px; position: relative; }
+.card.list .hd { display: flex; align-items: center; gap: 26px; font-weight: 800; font-size: 80px; line-height: 1.1; padding-bottom: 22px; }
+.card.list .hd .ico { font-size: 104px; }
+.card.list .row { display: flex; align-items: center; gap: 30px; font-weight: 800; font-size: 54px; padding: 20px 0; border-top: 3px solid #EEEAE4; position: relative; }
+.card.list .row .ib { width: 104px; height: 104px; border-radius: 50%; background: #FBE4E2; display: flex; align-items: center; justify-content: center; flex: none; }
+.card.list .row .ib .ico { font-size: 56px; }
+/* 4 or more rows: compact rows so the card ends above the caption line on the paper (y < 760) */
+.card.list.dense .hd { font-size: 72px; padding-bottom: 14px; }
+.card.list.dense .row { font-size: 48px; padding: 10px 0; gap: 24px; }
+.card.list.dense .row .ib { width: 78px; height: 78px; }
+.card.list.dense .row .ib .ico { font-size: 44px; }
+.lab { font-style: normal; display: inline-block; background: linear-gradient(135deg,#3FB8AF,#E3F5F3 50%,#52C7BE); color: #1E2430; font-weight: 800; font-size: 54px; line-height: 1.2; border-radius: 16px; padding: 8px 32px; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+.card.list .row .lab { margin-left: auto; font-size: 34px; padding: 6px 18px; }
+.card.list .lab.foot { position: absolute; left: 36px; bottom: -48px; transform: rotate(-2deg); }
+/* flow on paper: black start pill, white nodes 70 px, arrows with italic verb */
+.flow { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 4px; }
+.flow .node { display: flex; align-items: center; gap: 26px; background: #fff; border-radius: 26px; box-shadow: 0 8px 26px rgba(0,0,0,.14); padding: 26px 46px; font-weight: 800; font-size: 70px; line-height: 1.05; color: %INK%; }
+.flow .node .ico { font-size: 92px; }
+.flow .node.dark { background: %INK%; color: #fff; border-radius: 60px; padding: 12px 36px; font-size: 46px; }
+.flow .node.dark .ico { font-size: 52px; }
+.flow .node.hot .badge { width: 92px; height: 92px; border-radius: 16px; background: #F4A7A7; display: flex; align-items: center; justify-content: center; }
+.flow .node.hot .badge .ico { font-size: 60px; }
+.flow .arrow { display: flex; align-items: center; gap: 16px; color: %INK%; font-size: 84px; font-weight: 800; height: 120px; }
+.flow .arrow em { font-family: "PlayfairHF"; font-style: italic; font-weight: 600; font-size: 58px; }
+/* image card: 860 px wide */
+.card.image { padding: 16px; position: relative; }
+.card.image img { display: block; width: 828px; height: 380px; object-fit: cover; border-radius: 16px; }
+.card.image .lab.top { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-size: 42px; padding: 6px 26px; white-space: nowrap; }
+.pills { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.pills .pr { display: flex; gap: 18px; }
+.pills .p { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 40px; box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 12px 30px; font-weight: 800; font-size: 40px; color: %INK%; }
+.pills .p i { width: 14px; height: 14px; border-radius: 50%; background: %INK%; display: inline-block; }
+.pills .sub { background: #fff; border-radius: 40px; box-shadow: 0 6px 20px rgba(0,0,0,.16); padding: 10px 30px; font-family: "PlayfairHF"; font-style: italic; font-size: 40px; color: %INK%; }
+.card.kw { display: flex; align-items: center; gap: 22px; padding: 30px 46px; font-weight: 600; font-size: 72px; }
+.card.kw .key { background: linear-gradient(135deg,#3FB8AF,#E3F5F3 50%,#52C7BE); color: #1E2430; border-radius: 18px; padding: 4px 26px 10px; font-weight: 800; }
+
+/* ---- iteration 3 (07.10.2026): card types measured on the reference at full resolution ---- */
+.card-wrap.z-abs { top: 0; height: 0; display: block; }
+/* bar chart on paper (frames 1423-1632): heading 62 px Montserrat 800 centred, baseline y 151; card 880 x 484 at (100, 208) */
+.barsw { position: absolute; left: 0; top: 0; width: 1080px; height: 720px; transform-origin: 540px 450px; }
+.barsw .bhead { position: absolute; left: 0; top: 98px; width: 100%; text-align: center; font-weight: 800; font-size: 62px; line-height: 1; color: %INK%; white-space: nowrap; }
+.barsw .bhead .r { color: #1E2430; font-family: "PlayfairHF"; font-style: italic; }
+.barsw .bcard { position: absolute; left: 100px; top: 208px; width: 880px; height: 484px; border-radius: 28px; }
+.barsw .bline { position: absolute; left: 60px; top: 361px; width: 760px; height: 4px; background: rgba(30,36,48,.13); border-radius: 2px; }
+.barsw .bar { position: absolute; bottom: 124px; width: 168px; border-radius: 24px 24px 0 0; }
+.barsw .bar.grey { background: #E3F5F3; }
+.barsw .bar.ink { background: #1E2430; }
+.barsw .bar.red { background: %RED%; }
+.barsw .blab { position: absolute; top: 393px; width: 270px; text-align: center; font-weight: 800; font-size: 43px; line-height: 1; color: %INK%; white-space: nowrap; }
+.barsw .bpill { position: absolute; font-style: normal; background: linear-gradient(135deg,#3FB8AF,#E3F5F3 50%,#52C7BE); color: #1E2430; font-weight: 800; font-size: 40px; line-height: 45px; padding: 8px 26px; border-radius: 40px; box-shadow: 0 6px 16px rgba(0,0,0,.18); white-space: nowrap; }
+/* heart monitor on paper (frames 586-726): white bezel 878 x 382 at (102, 211), dark panel inset 21 px */
+.card.mon { position: absolute; left: 102px; top: 211px; width: 878px; height: 382px; border-radius: 30px; transform-origin: 50% 50%; }
+.mon .mpanel { position: absolute; left: 21px; top: 21px; width: 836px; height: 340px; border-radius: 20px; overflow: hidden; background-color: #1E2430;
+  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 50px 50px; }
+.mon .ecg { position: absolute; left: 82px; top: 0; width: 430px; height: 300px; overflow: visible; }
+.mon .ecg path { fill: none; stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 720 280; filter: drop-shadow(0 0 6px currentColor); }
+.mon .mdiv { position: absolute; left: 526px; top: 25px; width: 2px; height: 290px; background: #283040; }
+.mon .mhead { position: absolute; left: 557px; top: 48px; display: flex; align-items: center; gap: 16px; font-weight: 600; font-size: 40px; }
+.mon .mhead .ico { width: 60px; height: 60px; }
+.mon .mdot { position: absolute; left: 236px; top: 6px; width: 18px; height: 18px; border-radius: 50%; background: #52C7BE; }
+.mon .mnums { position: absolute; left: 552px; top: 138px; height: 160px; }
+.mon .mnum { position: absolute; left: 0; top: 0; font-weight: 900; font-size: 154px; line-height: 1; letter-spacing: -2px; white-space: nowrap; }
+.mon .marrow { position: absolute; left: 767px; top: 178px; width: 50px; height: 56px; overflow: visible; }
+.mon .marrow path { fill: none; stroke: #52C7BE; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+.mon .mtab { position: absolute; left: 43px; top: -43px; z-index: 2; font-style: normal; background: #1E2430; color: #fff; font-weight: 800; font-size: 44px; line-height: 53px; padding: 6px 28px; border-radius: 34px; transform: rotate(-3deg); transform-origin: 0 100%; }
+.mon .mlab { position: absolute; left: 408px; top: 345px; z-index: 2; font-size: 52px; padding: 6px 30px; transform: rotate(4deg); white-space: nowrap; }
+/* counter card on the video (frames 940-1026): 800 x 260 at (140, 132), heart 140 px, grey label 46 px, red value 150 px */
+.card.cnt { position: absolute; left: 140px; top: 132px; width: 800px; height: 260px; border-radius: 40px; transform-origin: 50% 50%; }
+.cnt .cico { position: absolute; left: 58px; top: 40px; width: 202px; height: 184px; }
+.cnt .cico svg { width: 202px; height: 184px; }
+.cnt .cico .ring { position: absolute; left: 14px; top: 14px; width: 174px; height: 174px; border-radius: 50%; border: 3px solid %RED%; opacity: 0; }
+.cnt .clab { position: absolute; left: 307px; top: 40px; font-weight: 600; font-size: 46px; line-height: 1; color: #1E2430; }
+.cnt .cvals { position: absolute; left: 312px; top: 92px; width: 470px; height: 150px; overflow: hidden; }
+.cnt .cval { position: absolute; left: 0; top: 0; font-weight: 900; font-size: 150px; line-height: 1; white-space: nowrap; letter-spacing: -2px; }
+.cnt .cval.red { color: #1E2430; }
+.cnt .cval.grey { color: #283040; }
+
+.dramav { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.dramav .vign { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at 50% 36%, rgba(30,36,48,0) 34%, rgba(30,36,48,.5) 72%, rgba(18,22,30,.88) 100%); }
+
+.dipc { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.dipc .dip { position: absolute; inset: 0; opacity: 0; background: #1E2430; }
+
+.card.kw.kwm { flex-direction: column; align-items: center; gap: 12px; padding: 26px 40px 24px; }
+.card.kw .kwrow { display: flex; align-items: center; gap: 22px; }
+.card.kw .kwsub { font-weight: 600; font-size: 34px; line-height: 40px; color: #1E2430; letter-spacing: 0.2px; }

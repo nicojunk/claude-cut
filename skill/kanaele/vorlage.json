@@ -1,0 +1,30 @@
+{
+ "name": "kanalname",
+ "anzeige": "Vorname Nachname",
+ "sprache": "de",
+ "rohmaterial": ["~/Pfad/zum/Rohmaterial"],
+ "transkripte": "~/Pfad/zum/Arbeitsordner/takes",
+ "arbeitsordner": "~/Pfad/zum/Arbeitsordner",
+ "ablage_praefix": "vorname-nachname",
+ "quelle_marke": "woher Farben und Schriften stammen (Designsystem, gemessenes Referenz-Reel)",
+ "farben": {
+  "ink": "#1E2430", "ink2": "#283040", "ink_tief": "#12161E",
+  "accent": "#3FB8AF", "accent2": "#52C7BE", "accent_hell": "#A8E2DD", "accent_blass": "#E3F5F3",
+  "papier": "#F7F8F6"
+ },
+ "raster": null,
+ "schriften_ordner": "~/Pfad/zu/den/Schriften",
+ "schriften": {
+  "text": {"datei": "Inter[opsz,wght].ttf", "gewicht": "100 900"},
+  "hero": {"datei": "CormorantGaramond[wght].ttf", "gewicht": "300 700"},
+  "akzent": {"datei": "CormorantGaramond-Italic[wght].ttf", "gewicht": "300 700"}
+ },
+ "css_zusatz": "",
+ "aufruf": {"mit": {"lead": "Kommentiere", "keyword": "WORT"}, "ohne": {"lead": "Link in der", "keyword": "BIO"}},
+ "regeln": ["Was dieser Kanal nie zeigt oder sagt, je 1 Satz mit Grund."],
+ "stopp": [{"muster": "regulärer ausdruck", "grund": "warum die Aufnahme hier anhält"}],
+ "rollen": {"key": [], "accent": []},
+ "plan_standard": {"tail": 0.6, "whoosh": false, "pause_cap": [0.45, 0.3], "start_zoom": 1.04, "scale": 1.12},
+ "titelbild": {"grund": "ink", "rand": "accent", "welle": "accent2", "zeile1_farbe": "#FFFFFF", "zeile2_farbe": "accent_hell",
+               "zeile1_schrift": "text", "zeile2_schrift": "akzent", "zeile1_versal": false}
+}
