@@ -16,14 +16,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kanal
 
 norm = lambda s: re.sub(r'[^\wäöüß0-9]', '', s.lower())
-DRAMA_FILTER = 'saturate(0.35) brightness(0.7) contrast(1.12)'   # the reference channel R1 to R4, Nico 15.10.2026 18:15 "die Hook muss krass sein"
-NACHHALL = 0.30          # s of silence after the last hook sound before the flash becomes visible (Nico 15.10.2026 23:17 "zu früh gewechselt")
+DRAMA_FILTER = 'saturate(0.35) brightness(0.7) contrast(1.12)'   # the reference channel R1 to R4, the user 15.10.2026 18:15 "die Hook muss krass sein"
+NACHHALL = 0.30          # s of silence after the last hook sound before the flash becomes visible (the user 15.10.2026 23:17 "zu früh gewechselt")
 BASE = {'und', 'ich', 'du', 'dir', 'dich', 'mir', 'die', 'der', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen', 'einem', 'einer', 'zu',
         'in', 'im', 'mit', 'für', 'von', 'vom', 'sie', 'wir', 'es', 'er', 'dass', 'wie', 'wenn', 'als', 'hat', 'habe', 'hast', 'haben',
         'bin', 'bist', 'sind', 'sich', 'mein', 'meine', 'meines', 'meinen', 'deine', 'deiner', 'dein', 'deinen', 'deinem', 'über', 'sei',
         'auf', 'an', 'am', 'nicht', 'was', 'so', 'ist', 'ja', 'auch', 'weil', 'oder', 'denn', 'wird', 'werden', 'kann', 'kannst', 'zum',
         'zur', 'bei', 'aus', 'nach', 'noch', 'nur', 'man', 'aber', 'dann', 'da', 'hier', 'sehr', 'mal', 'eben', 'halt', 'doch'}
 
+
+NACHLAUF = 0.50   # s nach dem letzten Laut des Reels (freigegebene Reels: 0,45 bis 0,53 s im fertigen Reel)
 
 def fehler(msg, code=2):
     print('REGEL:', msg, file=sys.stderr); sys.exit(code)
@@ -43,9 +45,9 @@ def transkript(clip):
 
 # ---------- stage 1: montage list ----------
 STOPP_KOPF = ('# STOPP: Kanalregel verletzt\n\nNichts gebaut. Nicht selbst herausschneiden und nicht um die Stelle herum schneiden: '
-              'ein Schnitt ändert, was die Person unter ihrem Namen sagt. Entscheidung bei Nico, eine von drei Möglichkeiten:\n'
+              'ein Schnitt ändert, was die Person unter ihrem Namen sagt. Entscheidung bei the user, eine von drei Möglichkeiten:\n'
               '1. Die Person nimmt den Satz neu auf (Satzspanne unten).\n2. Eine andere Aufnahme ohne diese Stelle wird gewählt.\n'
-              '3. Rechtliche Freigabe: dann trägt Nico sie in reel.json unter "stopp_freigabe" ein (Wort, Clip, Sekunde, von, Datum, Beleg).\n\n')
+              '3. Rechtliche Freigabe: dann trägt the user sie in reel.json unter "stopp_freigabe" ein (Wort, Clip, Sekunde, von, Datum, Beleg).\n\n')
 BLITZ_SICHTBAR = 6 / 30   # the light flash becomes visible about 6 frames before the cut (power2.in over 8 frames, inspection 17.10.)
 
 
@@ -67,7 +69,7 @@ def freigegeben(R, clip, wort, sek):
 
 def compliance_quelle(R, P, stuecke, out):
     """A stop word anywhere between the first and the last used second of a clip stops the reel, also when the chosen pieces
-    skip it: skipping the forbidden sentence is cutting it out, and that is Nico's decision. Runs before every other rule."""
+    skip it: skipping the forbidden sentence is cutting it out, and that is the user's decision. Runs before every other rule."""
     zeilen = []
     for clip in dict.fromkeys(s['clip'] for s in stuecke):
         lo = min(s['von'] for s in stuecke if s['clip'] == clip); hi = max(s['bis'] for s in stuecke if s['clip'] == clip)
@@ -117,7 +119,7 @@ def hook_pruefen(h, P):
     db, thr = huelle(h['clip'])
     if h['von'] <= 0.05 and laut(db, thr, 0.0, 0.02):
         print(f'HINWEIS Material: {h["clip"]} beginnt mitten im ersten Wort (Laut ab der ersten Probe). Die Lieferung blendet '
-              f'10 ms ein (kein Knacken); die fehlenden Millisekunden des Anlauts gibt es im Material nicht. Nico entscheidet, '
+              f'10 ms ein (kein Knacken); die fehlenden Millisekunden des Anlauts gibt es im Material nicht. the user entscheidet, '
               f'ob dieser Hook bleibt.')
     elif h['von'] > 0.05 and laut(db, thr, h['von'], h['von'] + 0.02):   # sound in the first 20 ms: the fade-in eats the onset
         fehler(f'Hook-Anfang {h["von"]:.2f} s liegt in einem Laut ({h["clip"]}): Anfang in die Stille davor legen '
@@ -126,7 +128,26 @@ def hook_pruefen(h, P):
     W = [w for w in _alle if w['e'] > h['von'] + 0.05 and w['s'] < h['bis']]   # Whisper-Anfänge bis 270 ms zu früh ("Zehn")
     if not W:
         fehler(f'Hook {h["clip"]} {h["von"]}-{h["bis"]}: keine Wörter im Transkript')
-    # Runde 5 (17.10.2026, Nico: "Warum fängst du so an, dass Menschen miteinander reden? Das ist ja kein richtiges Deutsch."): der
+    # Runde 6 (17.10.2026, Abnahme Fall 2 B1): ein Fehlstart im Rohclip (0,93 s Gemurmel, 0,71 s Pause, dann der Satz)
+    # war im Transkript nicht zu sehen: Whisper zog das dritte Wort über 0,20 bis 1,84 s, über die ganze Pause. Ein Wort, in dem eine Pause
+    # von mindestens 250 ms liegt und das davor und danach klingt, ist zusammengezogen: Fehlstart, Wiederholung oder ausgelassene
+    # Wörter. Dann stimmt das Transkript an dieser Stelle nicht, und auch die Satzanfang-Prüfung darunter nicht.
+    for _w in (w for w in _alle if w['e'] > h['von'] and w['s'] < h['bis']):
+        _k = list(range(max(0, int(_w['s'] * 100)), min(len(db), int(_w['e'] * 100))))
+        _lauf = [i for i in _k if db[i] > thr]
+        _luecke, _cur = 0, 0
+        for i in _k:
+            _cur = _cur + 1 if db[i] <= thr else 0
+            if _lauf and _lauf[0] < i - _cur and any(j > i for j in _lauf): _luecke = max(_luecke, _cur)
+        # mindestens 300 ms Pause UND überlang (0,6 s + 80 ms je Buchstabe): ein Wort aus 5 Buchstaben über 1,64 s mit 710 ms Pause; eine
+        # Zögerpause von 250 ms in einem Wort von 0,64 s ist gesprochen, kein Fehlstart
+        if _luecke >= 30 and _w['e'] - _w['s'] > 0.6 + 0.08 * len(re.sub(r'\W', '', _w['w'])):
+            fehler(f'Hook {h["clip"]}: das Wort "{_w["w"]}" ({_w["s"]:.2f} bis {_w["e"]:.2f} s) überspannt eine Pause von '
+                   f'{_luecke * 10} ms mit Laut davor und danach. Das ist ein Fehlstart, eine Wiederholung oder ausgelassene Wörter, '
+                   f'Whisper hat sie zusammengezogen. Den Abschnitt ohne Kontext neu transkribieren (python3.14, faster-whisper, '
+                   f'condition_on_previous_text=False), das Transkript im Kanalordner an dieser Stelle berichtigen (Sicherung daneben) '
+                   f'und den Hook an den Anfang des vollständigen Satzes legen')
+    # Runde 5 (17.10.2026, the user: "Warum fängst du so an, dass Menschen miteinander reden? Das ist ja kein richtiges Deutsch."): der
     # Hook beginnt an einem Satzanfang. Steht vor seinem ersten Wort ein Wort ohne Satzzeichen am Ende (". ? !"), beginnt er mitten
     # im Satz, oft mit einem Nebensatz ("dass ...", "weil ..."). Ausnahme nur mit "mitten_im_satz": true im Hook (bewusst entschieden).
     # erstes Wort = das erste, dessen Ende hinter dem Hook-Anfang liegt (Whisper setzt Anfänge bis 270 ms zu früh: "Zehn" 14,68 s,
@@ -222,6 +243,24 @@ def auswahl(reel_dir, var):
         print(f'Hook nach Vorlage {_nr} "{_muster}"')
     except ValueError as e:
         fehler(str(e))
+    # Runde 6 (18.10.2026, the user: das Reel endet abgehackt nach dem Aufruf): Reel 5 "mit" endete 0,21 s nach dem
+    # letzten Laut, alle freigegebenen Reels 0,45 bis 0,53 s; der freie Rand schnappte 120 ms hinter den Pausenanfang. Das letzte
+    # Stück endet jetzt NACHLAUF nach seinem letzten Laut, in der Stille des Rohclips; kommt vorher Sprache, steht das letzte Bild.
+    _s = stuecke[-1]
+    if len(stuecke) > 1 and not _s.get('bis_fest'):
+        _db, _thr = huelle(_s['clip'])
+        # nur Wörter, die vor dem geplanten Ende fertig sind: Whisper setzte das Folgewort 390 ms zu früh, in das Stück
+        _Wc = [w for w in transkript(_s['clip']) if w['e'] > _s['von'] and w['e'] <= _s['bis'] + 0.05]
+        if _Wc:
+            _letzt = letzter_laut(_s['clip'], _Wc[-1]['s'], _s['bis'] + 0.05, P) or _Wc[-1]['e']
+            _ziel = _letzt + NACHLAUF
+            _nxt = laut(_db, _thr, _letzt + 0.05, _ziel + 0.10)
+            _bis = round(min(_ziel, _nxt[0] / 100 - 0.05) if _nxt else _ziel, 3)
+            if _bis > _letzt + 0.05:
+                _fehlt = round(_ziel - _bis, 3)
+                stuecke[-1] = dict(_s, bis=_bis, bis_fest=True, **({'stille_danach': _fehlt} if _fehlt > 0.02 else {}))
+                print(f'Hinweis: letztes Stück endet {_bis:.2f} s statt {_s["bis"]:.2f} s ({NACHLAUF * 1000:.0f} ms nach dem letzten '
+                      f'Laut {_letzt:.2f} s' + (f', {_fehlt * 1000:.0f} ms stehendes Bild' if _fehlt > 0.02 else '') + ')')
     raender_pruefen(stuecke)
     (out / 'auswahl.json').write_text(json.dumps(stuecke, ensure_ascii=False, indent=1))
     print(f'auswahl {var}: {len(stuecke)} Stücke, Hook "{" ".join(w["w"] for w in W)}", Laut endet {wort_ende:.2f} s, '
@@ -306,7 +345,7 @@ def karte_aufloesen(karte, idx0, Wf, bis=None, tief=0):
 
 def fix_karte(W, R):
     """Caption fixes. 1. Whisper fragments are joined automatically: a token starting with "-" or "." belongs to the word
-    before ("7 -Tage -Challenge" -> "7-Tage-Challenge", "26 .10." -> "26.10.", inspection 17.10.2026). 2. reel.json "fix":
+    before ("3 -Wochen -Plan" -> "3-Wochen-Plan", "26 .10." -> "26.10.", inspection 17.10.2026). 2. reel.json "fix":
     the same number of words on both sides replaces word by word ("schreiben wir" -> "schreibe mir" keeps 2 captions with
     their own times); a different number joins into one caption on the first word's time."""
     fix, N, i = {}, len(W), 0
@@ -369,7 +408,7 @@ def plan(reel_dir, var):
         segments = [{'state': 'speaker', 'from': 0}]
     cards, absprung, cur = [], [], HOOK_N
     absprung.append({'stelle': 'Sekunde 0', 'zitat': ' '.join(w['w'] for w in W[:HOOK_N]), 'absprung': 'Hook, Daumen muss stoppen',
-                     'regel': 'stärkster emotionaler Satz aus der eigenen Aufnahme ab Bild 0, Nachhall >= 300 ms, dann Lock-in (Nico 15.10.2026)',
+                     'regel': 'stärkster emotionaler Satz aus der eigenen Aufnahme ab Bild 0, Nachhall >= 300 ms, dann Lock-in (the user 15.10.2026)',
                      'animation': 'Dramatik ab Bild 0' if segments[0].get('drama') else 'ohne Dramatik'})
     takte = R['takte'] + V.get('takte', [])
     idx = []
@@ -415,7 +454,7 @@ def plan(reel_dir, var):
         fehler(f'nur {len(dop)} Dopamin-Treffer markiert, mindestens 2 (Kallaway Dopamin-Leiter, references/story-rules.md)')
     for c in cards:
         if c['type'] != 'keyword' and not any(a.get('karte') == c['type'] for a in absprung):
-            fehler(f'Karte {c["type"]} ohne Eintrag in der Absprung-Karte: Animationen nur an Absprungstellen (Nico 15.10.2026)')
+            fehler(f'Karte {c["type"]} ohne Eintrag in der Absprung-Karte: Animationen nur an Absprungstellen (the user 15.10.2026)')
     if not R.get('nutzen_bei'):
         fehler('"nutzen_bei" fehlt: das Wort, ab dem die Zuschauerin ihren Nutzen hört (muss bis Sekunde 15 kommen)')
     Wf.finde(R['nutzen_bei'], HOOK_N)

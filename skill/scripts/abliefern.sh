@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Delivery of a reel pair to the desktop root (reference production 15.10.2026, generalised 17.10.2026).
-# Per version: liefer-titel.mp4 = liefer.mp4 with the cover as frame 0 (Nico 15.10.2026 18:13: WhatsApp and Instagram show
+# Per version: liefer-titel.mp4 = liefer.mp4 with the cover as frame 0 (the user 15.10.2026 18:13: WhatsApp and Instagram show
 # frame 0 as preview), encoded in ONE pass from render.mp4 with the same settings as liefer.mp4. The blend switches on the
 # timestamp T, not the frame number N (N starts at 1 in ffmpeg's blend: frame 0 was a half blend on 15.10.2026 19:20).
 # Checks: frame count, frame 0 is the cover (mean difference <= 6 grey levels), audio bit-identical to the checked liefer.mp4,

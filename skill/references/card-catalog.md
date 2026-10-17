@@ -1,7 +1,7 @@
 # Card catalogue (generated from scripts/erklaerer.py and baue_reel.py, 17.10.2026)
 
 Every card shows only what the speaker says in the take: `satz` = the take sentence it illustrates (required for explainers),
-`quelle` = source for anything the take does not say (a date, a number), Nico decides. Anchor fields (`at`, `until`, `*_at`, `*_bis`)
+`quelle` = source for anything the take does not say (a date, a number), the user decides. Anchor fields (`at`, `until`, `*_at`, `*_bis`)
 take a word of the speaker in reel.json ("Betonung", "Das ist die", "weil@2", or a list ["weil", "weil", "weil"]); plan_bauen.py turns
 them into word indices. Text fields: every visible text. Defaults are the words of the reference reel the card was built for; for any
 other channel the build refuses a card that would show a default (profile flag `kartentext_vorgabe_erlaubt` is set only for the reference channel).
@@ -13,7 +13,7 @@ or move `at`). Colours of blood, danger and wrong values use the channel's `sign
 Ground: "weiß" cards draw their accent lines on white (the channel accent needs >= 2:1 against white, kanal.py pruefen checks it),
 "dunkel" cards sit on the channel dark with accent and light accent text (a neon brand: neon only here).
 
-Placeholders (Nico 15.10.2026, R2 freebie card): no card may stand half empty after it enters. eigenpruefung.py measures the card
+Placeholders (the user 15.10.2026, R2 freebie card): no card may stand half empty after it enters. eigenpruefung.py measures the card
 interior at appear + 0.35 s (content >= 2 %); when content lands later than that, draw dashed "?" placeholders that pulse until the
 anchor word (see the `.exslot` placeholders of the premium shell).
 

@@ -69,7 +69,7 @@ CSS += '''
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Premium shell shared by all premium explainers (Nico 08.10.2026: "Richtung stimmt", premium level approved).
+# Premium shell shared by all premium explainers (the user 08.10.2026: "Richtung stimmt", premium level approved).
 # Rules learned in the prototypes: never scale an SVG <g> with GSAP (pivots drift), use HTML layers for pops and
 # stamps; SVG only gets attr tweens, stroke-dashoffset and rotation with svgOrigin.
 # ---------------------------------------------------------------------------------------------------------------

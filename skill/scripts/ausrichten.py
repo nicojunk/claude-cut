@@ -97,7 +97,7 @@ verschoben, verschoben_i = [], []
 # Nachausrichtung (Abnahme R3 v1 15.10.2026: nach "Hör" in der Stille lagen "mal" und "hin!" 170 bis 215 ms zu spät, die
 # Ausrichtung des ganzen Stücks war am Anfang verrutscht). Für jedes aus der Stille geholte Wort wird sein Lauf (Folgewörter
 # mit weniger als 0,25 s Abstand, höchstens 8) im engen Fenster ab dem neuen Anfang neu ausgerichtet. Übernommen wird nur ein
-# früherer Anfang (nie später, Lehre "Kostenfrei"), das geholte Wort behält den Pegelanfang, wenn der früher liegt.
+# früherer Anfang (nie später, Lehre "Kostenlos"), das geholte Wort behält den Pegelanfang, wenn der früher liegt.
 nachgerichtet = []
 for i in verschoben_i:
     k = i
@@ -153,6 +153,7 @@ for _x in range(_n + 1):
     if not _q and _s0 is not None:
         if _x - _s0 >= 6: _laeufe.append((_s0 / 100, _x / 100))
         _s0 = None
+_gem = set()   # Runde 6: Wörter mit gemessenem Einsatz (Pause, Stückanfang, Hüllkurve, Anlaut); anlaut.verbunden lässt sie stehen
 eingesetzt = []
 for i, w in enumerate(W):
     lo = W[i - 1]['e'] - 0.05 if i else -1
@@ -169,10 +170,10 @@ for i, w in enumerate(W):
     if i + 1 < len(W) and on > W[i + 1]['s'] - 0.05:
         continue
     s_neu = round(on - 0.03, 3)
-    # nur nach vorn: ein behauchter Anlaut ("Kostenfrei") bleibt unter Schwelle + 18 dB, der Einsatz läge sonst auf dem Vokal
+    # nur nach vorn: ein behauchter Anlaut ("Kostenlos") bleibt unter Schwelle + 18 dB, der Einsatz läge sonst auf dem Vokal
     # (Abnahme R2: Untertitel 299 ms zu spät)
     if s_neu < w['s'] - 0.15:
-        eingesetzt.append(f"{w['w']} {w['s']:.2f}->{s_neu:.2f}")
+        eingesetzt.append(f"{w['w']} {w['s']:.2f}->{s_neu:.2f}"); _gem.add(id(w))
         w['s'] = s_neu; w['e'] = max(w['e'], s_neu + 0.08)
 if eingesetzt:
     print('Wortanfang auf den Einsatz nach der Pause:', ', '.join(eingesetzt))
@@ -209,7 +210,7 @@ for _k, (_a, _b) in enumerate(_st_kanten):
     _s_neu = round(max(_a + 0.01, _on / 100 - 0.03), 3)
     # later only when glued to the piece start (never "correct" a start later from the envelope otherwise: pitfall 12)
     if (_geklebt and _s_neu - w['s'] > 0.05) or (not _geklebt and w['s'] - _s_neu > 0.05):
-        _stueck_neu.append(f"{w['w']} {w['s']:.2f}->{_s_neu:.2f} (Stück {_k})")
+        _stueck_neu.append(f"{w['w']} {w['s']:.2f}->{_s_neu:.2f} (Stück {_k})"); _gem.add(id(w))
         w['s'] = _s_neu; w['e'] = max(w['e'], _s_neu + 0.08)
 if _stueck_neu:
     print('Erstes Wort im Stück auf den eigenen Einsatz:', ', '.join(_stueck_neu))
@@ -232,11 +233,11 @@ for w in W:
 if _gekuerzt:
     print('Wortende vor die Pause im Wort:', ', '.join(_gekuerzt))
 # Audible onset from the envelope (method of the independent inspector, einsatz.py): a word that follows a dip of at least
-# 15 dB starts where the level rises again; the CTC start was up to 207 ms later ("verspreche", "mir", R3 17.10.2026).
+# 15 dB starts where the level rises again; the CTC start was up to 207 ms later ("verrate", "mir", R3 17.10.2026).
 # Only earlier, never into the previous word. With the extra rules of einsatz.py (never across a piece start, the take's
 # speech level held 30 ms, a dip owned by the next aligned word skipped): round 2 (deep male voice, room noise) 4 hand-
 # measured starts moved from -142/-74/-100/-40 ms to -75/-12/-35/-4 ms; the reference channel R3 unchanged at the words
-# the inspection had found late ("verspreche", "mir").
+# the inspection had found late ("verrate", "mir").
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import einsatz as _ez
 _r1 = _ez.huelle_1ms(audio.numpy(), SR)
@@ -252,7 +253,7 @@ for i, w in enumerate(W):
     s_neu = round(on - 0.02, 3)
     _lags.append(w['s'] - s_neu)
     if w['s'] - s_neu > 0.06 and s_neu > (W[i - 1]['s'] + 0.05 if i else 0.0):
-        _frueh.append(f"{w['w']} {w['s']:.2f}->{s_neu:.2f}")
+        _frueh.append(f"{w['w']} {w['s']:.2f}->{s_neu:.2f}"); _gem.add(id(w))
         w['s'] = s_neu
         if i and W[i - 1]['e'] > s_neu:
             W[i - 1]['e'] = s_neu
@@ -264,7 +265,7 @@ import anlaut as _an
 _B = _an.baender_aus(audio.numpy(), SR)
 _anl = []
 for i, w in enumerate(W):
-    a_ = _an.anlaut(w, W[i - 1]['s'] if i else 0.0, _B)
+    a_ = _an.anlaut(w, W[i - 1]['s'] if i else 0.0, _B, W[i - 1]['w'] if i else '')
     if a_ is None:
         continue
     s_neu = round(a_ - 0.01, 3)
@@ -273,7 +274,7 @@ for i, w in enumerate(W):
     _g = (_st_kanten[w['stueck']][0] if isinstance(w.get('stueck'), int) and 0 <= w['stueck'] < len(_st_kanten)
           else max([a0 for a0, _ in _st_kanten if a0 <= w['s'] + 1e-6] or [0.0]))
     if 0.04 < w['s'] - s_neu <= 0.25 and s_neu > (W[i - 1]['s'] + 0.08 if i else 0.0) and s_neu >= _g:
-        _anl.append(f"{w['w']} {w['s']:.2f}->{s_neu:.2f}")
+        _anl.append(f"{w['w']} {w['s']:.2f}->{s_neu:.2f}"); _gem.add(id(w))
         w['s'] = s_neu
         if i and W[i - 1]['e'] > s_neu:
             W[i - 1]['e'] = s_neu
@@ -293,6 +294,11 @@ if len(_lags) >= 5:
             if i and W[i - 1]['e'] > s_neu:
                 W[i - 1]['e'] = s_neu
     print(f'Verbundene Sprache: CTC-Verzug Median {_lag * 1000:.0f} ms aus {len(_lags)} messbaren Wörtern, {_n_lag} Wörter vorgezogen')
+# Runde 6 (17.10.2026): verbundene Rede ohne messbaren Einsatz, anlaut.verbunden (Lücke mit Senke, stimmhafte Lücke, Spektralwechsel)
+_vb = _an.verbunden(W, audio.numpy(), SR, gemessen=lambda w: id(w) in _gem, stueck_anfang=lambda w: (_st_kanten[w['stueck']][0] if isinstance(w.get('stueck'), int)
+                    and 0 <= w['stueck'] < len(_st_kanten) else max([a0 for a0, _ in _st_kanten if a0 <= w['s'] + 1e-6] or [0.0])))
+if _vb:
+    print(f'Verbundene Rede, Wortanfang früher ({len(_vb)}):', ', '.join(_vb[:12]) + (' …' if len(_vb) > 12 else ''))
 # Handkorrektur je Fassung (woerter-korrektur.json: {"Wort": "wirklich", "s": 55.09}), gemessen an der Hüllkurve und belegt durch
 # eine Abnahme (R1 Runde 8: "wirklich" begann mit dem leisen w 230 ms vor dem Modellanfang)
 _kp = wp.with_name('woerter-korrektur.json')

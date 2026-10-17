@@ -102,7 +102,7 @@ for i in range(len(alle) - 1):
         gesicht = None if wechsel else gesicht_faktor(i)
         band = None if wechsel else ohne_untertitel_faktor(i)
         # 17.10.2026: a jump that the take itself shows at the same place is a camera cut or zoom in the raw footage (the reference channel's
-        # interview interview.mp4 at 2.73 s: 0.921 in take and reel), not an edit defect: hint, Nico decides
+        # interview interview.mp4 at 2.73 s: 0.921 in take and reel), not an edit defect: hint, the user decides
         aus_take = quelle is not None and abs(quelle - s) < 0.02
         # the whole-frame estimate also reacts to a big caption word popping in or a flash; measured again only on the face band
         # (contrast-equalised against the drama darkening), as the manual check of 16.10.2026 did (R3 2.700 s: caption artefact)

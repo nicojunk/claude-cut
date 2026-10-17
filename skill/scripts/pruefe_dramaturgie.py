@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dramaturgy gate on the built composition (before the render), from Nico's feedback on the reference reels 15.10.2026:
+"""Dramaturgy gate on the built composition (before the render), from the user's feedback on the reference reels 15.10.2026:
   1 hook from frame 0; between the hook's last sound (take envelope) and the first VISIBLE frame of the change (the flash shows
     about 6 frames before the cut) lie at least 300 ms (23:17 "Bei dem 3 Clip wird zu früh der Clip gewechselt"; inspection
     17.10.2026 measured 23 ms in R3 although the cut came 356 ms after the word)

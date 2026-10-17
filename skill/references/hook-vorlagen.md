@@ -1,7 +1,7 @@
 # 50 hook templates (German), for the cover text and the spoken hook
 
-Source: Nico's template set of 11.10.2026 (02_Areas/marketing/2026-10-11-hook-vorlagen-deutsch, rebuilt by mechanism from "50 Viral Hook Templates").
-Cover rule (Nico 15.10.2026 17:41): pick the template that fits the reel's core sentence best, fill it only with the creator's own content,
+Source: the user's template set of 11.10.2026 (02_Areas/marketing/2026-10-11-hook-vorlagen-deutsch, rebuilt by mechanism from "50 Viral Hook Templates").
+Cover rule (the user 15.10.2026 17:41): pick the template that fits the reel's core sentence best, fill it only with the creator's own content,
 at most 2 lines, no punctuation, no connectors (aber, weil), one clear subject, upper third. Name the template number in reel.json
 ("titelbild.vorlage"). Numbers in the examples are placeholders; only a number the creator says or has proven goes on a cover.
 

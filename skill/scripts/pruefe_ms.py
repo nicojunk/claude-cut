@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.14
-"""Millisekundengenaue Abnahme eines Referenz-Reels vor jeder Abgabe (Nico 15.10.2026 01:41: "Bevor du jetzt das nächste Mal
+"""Millisekundengenaue Abnahme eines Referenz-Reels vor jeder Abgabe (the user 15.10.2026 01:41: "Bevor du jetzt das nächste Mal
 schon wieder schludrig fertig wirst, erwarte ich, dass du das Millisekunden genau davor prüfen lässt.")
 
 Aufruf: python3.14 pruefe_ms.py REEL.mp4 PROJEKT/edl.json take.stuecke.json woerter.json
@@ -10,7 +10,7 @@ Prüft und listet jede Stelle mit Zahl in ms:
  3 Untertitel-Timing: Einblendung jedes Worts (edl) gegen seinen Sprechbeginn im fertigen Reel, Median und Maximum in ms.
  4 Karten-Anker: Erscheinen jeder Karte gegen den Sprechbeginn ihres Ankerworts.
  5 Bild beginnt bei 0,000 s, Ton endet vor dem Bild.
-Exit 0 nur, wenn 1, 2, 5 ohne Befund sind und 3b (95 % innerhalb 120 ms, kein Untertitel über 250 ms früh) besteht.
+Exit 0 nur, wenn 1, 2, 5 ohne Befund sind und 3b (95 % höchstens 120 ms zu spät, kein Untertitel über 250 ms früh) besteht.
 Abschnitt 3 (Whisper) ist seit 15.10.2026 06:50 nur Auskunft: Whisper-Wortanfänge liegen im Median 190 bis 215 ms zu früh."""
 import os, json, re, subprocess, sys, tempfile
 import numpy as np
@@ -130,7 +130,7 @@ for _blk in sm.get_matching_blocks():
     for _q in range(_blk.size):
         _wh[_blk.a + _q] = hoer[_blk.b + _q]['s']
 _idx = {id(_w): _i for _i, _w in enumerate(E['words'])}
-# only words that are shown: a Whisper fragment joined into the word before ("7 -Tage -Challenge" shown as "7-Tage-Challenge")
+# only words that are shown: a Whisper fragment joined into the word before ("3 -Wochen -Plan" shown as "3-Wochen-Plan")
 # stays in edl words but has no caption of its own (validation 17.10.2026: '-Tage' reported 611 ms early, never shown)
 _plan_p = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(edl_p))), 'plan.json')
 _sichtbar = ({i_ for g_ in json.load(open(_plan_p))['groups'] for i_ in g_['w']} if os.path.exists(_plan_p)
@@ -198,9 +198,12 @@ for k_ in range(len(grenzen) - 1):
         elif v > 0.15:
             print(f"  '{w['t']}' Einblendung {cap:.3f} s, Wortanfang {on_:.3f} s, Vorlauf {v * 1000:.0f} ms  (Warnung)")
 vv = np.array(vorl)
-p95 = np.percentile(np.abs(vv), 95) * 1000
-print(f'  95 % der Untertitel innerhalb {p95:.0f} ms um den ausgerichteten Wortanfang (Grenze 120 ms), n {len(vv)}')
-if p95 > 120: befunde.append(f'Untertitel-Timing 95 % = {p95:.0f} ms > 120 ms (3b)')
+# Runde 6 (17.10.2026): die Grenzen der Abnahme sind ungleich, höchstens 120 ms nach und höchstens 250 ms vor dem hörbaren Beginn.
+# Das Modell setzt in verbundener Rede bis 230 ms zu spät an (Abnahme Runde 5), anlaut.verbunden zieht diese Wörter vor. Gegen
+# das Modell gemessen ist "früh" deshalb gewollt; die 95-%-Grenze gilt nur noch für die Verspätung (früh: Befund je Wort über 250 ms).
+p95 = np.percentile(np.maximum(0.0, -vv), 95) * 1000
+print(f'  95 % der Untertitel höchstens {p95:.0f} ms nach dem ausgerichteten Wortanfang (Grenze 120 ms), n {len(vv)}')
+if p95 > 120: befunde.append(f'Untertitel-Timing 95 % = {p95:.0f} ms zu spät > 120 ms (3b)')
 print(f'  {len(vv)} Wörter ausgerichtet, Untertitel gegen Wortanfang: Median {np.median(-vv) * 1000:+.0f} ms (plus = später), '
       f'größter Vorlauf {vv.max() * 1000:.0f} ms, {n3b} Befunde')
 

@@ -391,7 +391,7 @@ def pop2(sel, t):
     return (f'tl.set("{sel}",{{scale:0.9,opacity:0}},0);'
             f'tl.fromTo("{sel}",{{scale:0.9,opacity:0}},{{scale:1,opacity:1,duration:{2/FPS:.4f},ease:"back.out(2)",immediateRender:false}},{t:.4f});')
 
-SFX_EVENTS = []   # (name, time, volume) collected from explainers; very soft (Nico 08.10.2026: "der Ton ist zu viel")
+SFX_EVENTS = []   # (name, time, volume) collected from explainers; very soft (the user 08.10.2026: "der Ton ist zu viel")
 
 def card(c, cid, T):
     """c: card dict from plan; T(word_index) -> output seconds. Returns (html, js)."""
@@ -700,9 +700,16 @@ def main(plan_path, proj):
         # gleicher Zustand davor und danach (Betonungsblitz Sprecher -> Sprecher, Fall 1 Runde 5 "Unterschied"): kein Bildwechsel,
         # der Blitz darf ins Vorwort rücken, 4 Bilder genügen; bei einem Bildwechsel braucht es die Pause (5 Bilder)
         gleich = segs[k - 1]['state'] == s['state']
-        neu = round((w0 - (4 if gleich else 5) / FPS) * FPS) / FPS
         vor_ende = M(words[s['from'] - 1]['e']) if s['from'] > 0 else 0.0
-        if (not gleich and neu - vor_ende < 2 / FPS) or neu <= seg_t[k - 1] + 0.2 or any(neu - 0.02 < x < seg_t[k] + 0.02 for x in _kanten):
+        # Runde 6 (17.10.2026, Fall 2: erstes Wort nach einem Satzende, 210 ms Pause): passen 5 Bilder nicht, dann 4 (das Wort erscheint
+        # pünktlich, die Haltezeit endet auf ihm) oder 3 (33 ms später, unter der Grenze von G); vorher blieb der Wechsel auf dem
+        # Wort und hielt es 133 ms zurück
+        for n_ in ((4, 3) if gleich else (5, 4, 3)):
+            neu = round((w0 - n_ / FPS) * FPS) / FPS
+            if not ((not gleich and neu - vor_ende < 2 / FPS) or neu <= seg_t[k - 1] + 0.2
+                    or any(neu - 0.02 < x < seg_t[k] + 0.02 for x in _kanten)):
+                break
+        else:
             print(f'note: Blitzwechsel {k} bleibt auf dem ersten Wort {w0:.3f} s (keine Pause davor)')
             continue
         print(f'note: Blitzwechsel {k} von {seg_t[k]:.3f} auf {neu:.3f} s, {round((w0 - neu) * FPS)} Bilder vor das erste Wort')
@@ -828,12 +835,12 @@ def main(plan_path, proj):
         missing = [d_ for d_ in re.findall(r'\d+', card_texts(c)) if d_ not in spoken]
         if missing:
             raise SystemExit(f'plan error: card {k} ({c["type"]}) shows {missing}, which the take never says. Use what the speaker says, '
-                             f'show the direction without a number, or add "quelle" with the source for Nico to decide')
+                             f'show the direction without a number, or add "quelle" with the source for the user to decide')
     # compliance stop words of the channel (profile "stopp"): on every visible card text and every caption word
     _stopp = kanal.stopp_treffer([card_texts(c) for c in plan.get('cards', [])] + [' '.join(w['t'] for w in words)], P)
     if _stopp:
         raise SystemExit('STOPP Kanalregel: ' + '; '.join(f'"{m}" ({g})' for g, m, _ in _stopp[:8]) +
-                         '. Nicht selbst herausschneiden: Wortlaut mit Zeitcode an Nico melden (references/creator-profile.md).')
+                         '. Nicht selbst herausschneiden: Wortlaut mit Zeitcode an the user melden (references/creator-profile.md).')
 
     # hero punch-ins (never within 6 frames of a card entrance: the mini flash would wash the card out)
     card_t = [Tc(c['at']) + CAP_DELAY / FPS for c in plan.get('cards', [])]
@@ -876,7 +883,7 @@ def main(plan_path, proj):
         h, j = card(dict(c, _am_wechsel=_kw or any(abs(a - x) < 0.5 / FPS for x in seg_t[1:-1]), _ende=b), f'c{k}', Tk)
         cards_out.append({'id': f'c{k}', 'type': c['type'], 'zone': c.get('zone', 'top'), 'appear': round(a + CAP_DELAY / FPS, 4), 'end': round(b, 4),
                           **({'zoom': True} if c.get('zoom_src') else {}),
-                          # planned turn of a card (visitenkarte_flip, start as in erklaerer: tf = T(flip_at) + D - 3 frames): edge-on the
+                          # planned turn of a card (karte_flip, start as in erklaerer: tf = T(flip_at) + D - 3 frames): edge-on the
                           # dark card shows the paper behind it for a frame; flimmern.py leaves these frames out (round 2, 17.10.2026)
                           **({'drehung': round(Tk(c['flip_at']) + CAP_DELAY / FPS - 3 / FPS, 4)} if c.get('flip_at') is not None else {}),
                           **({'sub_appear': round(T(c['sub_at']), 4)} if c.get('sub_at') is not None and c['type'] == 'title' else {})})
@@ -1064,7 +1071,7 @@ def main(plan_path, proj):
                 # readability: white captions need a dark background (reference: always on the dark shirt, contrast
                 # 10th percentile 4.4:1). Try up to 300 px further down the torso in 20 px steps; move only if a position
                 # reaches 3.0:1. Otherwise the caption stays at the cutter's position and is reported: a stronger
-                # shadow would change the style, that is Nico's decision (08.10.2026).
+                # shadow would change the style, that is the user's decision (08.10.2026).
                 mid = (words[g['w'][0]]['s'] + words[g['w'][-1]]['e']) / 2
                 c0 = contrast_at(src, mid, top_g, full_dy, scale0)
                 if c0 < 3.0:
@@ -1094,7 +1101,7 @@ def main(plan_path, proj):
                 for fp in flashes_out:
                     if fp - 2 / FPS <= tw < fp + 4 / FPS:
                         tw = fp + 4 / FPS
-            # word pop (Nico 08.10.2026: "Untertitel lebendiger", taken from the edit he preferred): hero and key jump in at
+            # word pop (the user 08.10.2026: "Untertitel lebendiger", taken from the edit he preferred): hero and key jump in at
             # 128 % and spring back over 5 frames (back.out 1.4), small words grow from 86 %; all rise 14 px; 3-frame fade
             # im Splitscreen stehen Hauptwörter in der Zeile mit ihren Nachbarn: 128 % überdeckten im 1. Bild den Wortabstand
             # ("Undsobald", Abnahme R2 G7), dort 108 %; Deckkraft in 2 Bildern (Regel des Referenzkanals: höchstens 1 Übergangsbild)
@@ -1151,7 +1158,7 @@ window.__timelines["reel"] = tl;
     (proj / 'untertitel-zeiten.json').write_text(json.dumps({str(k): v for k, v in sorted(zeigt.items())}))
     if low_contrast:
         print(f'WARN: white captions on a bright background in groups {low_contrast} (below 3.0:1 even 300 px lower). '
-              f'Options for Nico: stronger shadow, show these phrases on the paper, or keep them as they are.')
+              f'Options for the user: stronger shadow, show these phrases on the paper, or keep them as they are.')
     print(f'ok: {len(ranges)} keep ranges, {total:.2f} s (source {t1-t0:.2f} s), {len(groups)} caption groups, '
           f'{len(plan.get("cards", []))} cards, face_y {fy:.3f} -> full_dy {full_dy:.0f}px split_dy {split_dy:.0f}px, captions full at y={cap_top}')
 

@@ -2,7 +2,7 @@
 """Master the audio of a rendered reel: compressed speech at -14 LUFS, true peak <= -1.5 dBTP, AAC 48 kHz stereo 256 kb/s.
 Usage: python3 mastern.py IN OUT.mp4   (video stream is copied)
 
-15.10.2026 19:20 (Nico 18:15: "dieses Zischen"), gemessen an R3:
+15.10.2026 19:20 (the user 18:15: "dieses Zischen"), gemessen an R3:
 - S-Laute: Bandkompressor nur über 4,8 kHz (acrossover 8. Ordnung, Summe flach). Schwelle = 80. Perzentil des HF-Bandpegels in
   Sprachfenstern (20 ms) dieser Fassung, Verhältnis 8, Attack 0,5 ms, Release 40 ms. R3: Klarheit (HF zu Mitte, Median) 3,4 dB
   heller als vorher, S-Laute p95 2 dB und lauteste 1 % 7,5 dB unter der alten Fassung, Zischspitzen 0,8 dB darunter.

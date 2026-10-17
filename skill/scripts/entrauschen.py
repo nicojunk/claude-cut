@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rauschminderung je Rohclip einstellen (15.10.2026 18:50, Nico 18:15: "dieses Zischen").
+"""Rauschminderung je Rohclip einstellen (15.10.2026 18:50, the user 18:15: "dieses Zischen").
 Befund: afftdn=nf=-30 (fest) hielt die Stimme des Referenzkanals oberhalb 1 kHz für Rauschen und senkte sie um 7 bis 13 dB (Konsonanten
 dumpf), das Rauschen in den Pausen nur um denselben Betrag; nach Kompression und Lautheit trat das Rauschen relativ hervor.
 Jetzt: je Clip das höchste nf (stärkste Minderung), bei dem die Stimme in den Bändern 1-3, 3-6 und 6-10 kHz höchstens 1,0 dB

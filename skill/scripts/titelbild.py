@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cover (Titelbild) with a text hook in the upper third, in the channel's colours and fonts.
 
-Rules (Nico 15.10.2026 17:41 and 18:13): the text is the best fitting of the 50 hook templates (references/hook-vorlagen.md),
+Rules (the user 15.10.2026 17:41 and 18:13): the text is the best fitting of the 50 hook templates (references/hook-vorlagen.md),
 at most 2 lines, no punctuation, upper third (inside the 4:5 profile crop y 285 to 1635). The still moves down by VERSATZ px so
 card and face never overlap; above it the channel's dark colour with a soft blend into the picture. The cover becomes frame 0 of
 the delivered reel (abliefern.sh), so WhatsApp and Instagram show it as preview.

@@ -55,7 +55,7 @@ No new rule in the 10 videos. Captions alone are no visual hook (N01); the text 
 ## 7 Sound
 - **B14** 4K and clean audio signal care [94ezZMYPzls 8:57]. Transfer: hiss fix, -14 LUFS, de-esser.
 - **B15** The platform analyses picture, transcript and audio; music and sounds stay on topic [94ezZMYPzls 1:17].
-  Transfer: no music without a licensed source; card sounds very soft (Nico 08.10.2026: "der Ton ist zu viel").
+  Transfer: no music without a licensed source; card sounds very soft (the user 08.10.2026: "der Ton ist zu viel").
 
 ## 8 End, loop, call to action
 - **N12** The last line is the most memorable and leads back into the first on replay [WluuZB_ck9Q 8:52]. Without a call
@@ -68,4 +68,4 @@ No new rule in the 10 videos. Captions alone are no visual hook (N01); the text 
 
 ## 10 AI editing
 - **B20** One-shot editing templates are weak; edit after a reference reel [vwlK6MbdAto 44:39]. Transfer: this skill
-  edits after the measured reference reels, and Nico's eye decides "premium".
+  edits after the measured reference reels, and the user's eye decides "premium".

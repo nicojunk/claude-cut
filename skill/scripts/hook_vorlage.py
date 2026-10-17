@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The 50 hook templates are the basis of every text hook (Nico 17.10.2026: "die 50 Vorlagen, woran sich immer orientiert
+"""The 50 hook templates are the basis of every text hook (the user 17.10.2026: "die 50 Vorlagen, woran sich immer orientiert
 werden soll und wovon eine benutzt werden soll, die passendste"). Until round 5 the rule only lived in SKILL.md; reel.json
 could leave "vorlage" out or name anything. This module reads references/hook-vorlagen.md and checks a "vorlage" field:
 it must start with a template number 1 to 50 that exists in the file. Used by plan_bauen.py (spoken hook, hook.vorlage)

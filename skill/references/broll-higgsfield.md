@@ -4,7 +4,7 @@ B-roll is optional. It earns its place only where a picture explains something t
 Most reference reels had none: the creator's face plus cards carried them.
 
 ## Look
-A cinematic still life of one object that shows the sentence: dark, low key, one warm side light, no person (Nico
+A cinematic still life of one object that shows the sentence: dark, low key, one warm side light, no person (the user
 08.10.2026 preferred this over lifestyle shots). Prompt pattern (Higgsfield `soul_2`, 9:16):
 "Cinematic moody still life, vertical. [one object that shows the sentence]. Low-key lighting, single warm side light, deep
 soft shadows, teal shadows and warm highlights, shallow depth of field, shot on 35mm film, subtle film grain. No people,
@@ -19,7 +19,7 @@ flow through it, no video model needed.
 | `soul_2` (CLI name `text2image_soul_v2`) | still life B-roll, 9:16; a 1.5k request was delivered as 720p (17.10.2026), enough for B-roll | 0.12 |
 | `nano_banana` | drafts, motif search | 1 |
 | `nano_banana_2` | sharpening a chosen motif | 1.5 |
-| `nano_banana_pro` | the one final image, exactly 1 run (Nico 15.09.2026) | 2 |
+| `nano_banana_pro` | the one final image, exactly 1 run (the user 15.09.2026) | 2 |
 | Kling 3.0 std 3 s, no sound | motion only if motion is the point | 3.75 |
 | Kling 3.0 std 5 s, no sound | | 6.25 |
 | Seedance 2.5 15 s | never as a first attempt | 97.5 to 135 |
@@ -30,7 +30,7 @@ Video models need at least the Basic plan; a free account rejects them.
    purpose into the ledger file from the settings (`credit_log` in `~/.config/smm-clipping/config.json`).
 2. Before every run: estimate with `higgsfield generate cost <model> …` (the MCP `get_cost` flag was ignored once and
    billed a real job) and write the estimate into the ledger.
-3. Hard stops without Nico's explicit go in the conversation: a single run above 50 credits, a session above 100, or a
+3. Hard stops without the user's explicit go in the conversation: a single run above 50 credits, a session above 100, or a
    balance that would fall below 200.
 4. First attempt always the cheapest: shortest duration, std/720p, sound off, one clip. Lengthen or upscale only the
    take that is kept.

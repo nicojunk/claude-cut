@@ -13,7 +13,7 @@
 Why fixed limits (reference production 15.10.2026): 9 parallel chains drove the load to 90 to 117, builds failed for no reason
 and Whisper crawled. Now: builds run one after another, at most 2 renders and 1 Whisper/alignment job at a time (file locks in
 ~/.cache/smm-clipping/locks, shared by every Claude session on this machine). Renders go to the settings' renders folder
-(default ~/Renders), never into iCloud (Nico 16.10.2026: 101.5 s iCloud CPU per render inside the Desktop, 3.4 s outside).
+(default ~/Renders), never into iCloud (the user 16.10.2026: 101.5 s iCloud CPU per render inside the Desktop, 3.4 s outside).
 Every step writes into the version folder (REELORDNER/mit, REELORDNER/ohne): bau.txt, pruefung.txt, pruefung.json.
 """
 import fcntl, json, os, shutil, subprocess, sys, time
@@ -71,7 +71,7 @@ class Fehler(Exception):
 
 
 def zeit(rd, v, phase, sek):
-    """Machine time per phase, measured (Nico's benchmark: <= 60 min per reel pair)."""
+    """Machine time per phase, measured (the user's benchmark: <= 60 min per reel pair)."""
     f = rd / 'zeiten.json'
     z = json.loads(f.read_text()) if f.exists() else {}
     z.setdefault(v, {})[phase] = round(z.get(v, {}).get(phase, 0) + sek, 1)
@@ -180,7 +180,7 @@ def material(name, clips):
                 b.append(f'- Hinweis: {de(x)}')
         for g, m, _ in hits:
             w = next((x for x in W if kanal.re.sub(r'\W', '', x['w'].lower()).startswith(kanal.re.sub(r'\W', '', m.split()[0].lower()))), None)
-            b.append(f'- STOPP {g}: "{m}"' + (f' bei {w["s"]:.2f} s' if w else '') + ' (diese Spanne nicht verwenden oder Nico fragen)')
+            b.append(f'- STOPP {g}: "{m}"' + (f' bei {w["s"]:.2f} s' if w else '') + ' (diese Spanne nicht verwenden oder the user fragen)')
         b += ['', 'Prüfe Fachwörter und Namen im Text: Whisper verhört sie (ein Fachwort wird als ähnlich klingendes Wort geschrieben); Korrektur in reel.json "fix".', '', text, '']
         (mordner / f'{Path(c).stem}.md').write_text('\n'.join(b), encoding='utf-8')
         print(f'Material: {mordner / (Path(c).stem + ".md")}' + ('  STOPP-TREFFER' if hits else ''))

@@ -5,7 +5,7 @@ Prüft: Bildspur beginnt bei 0,000 s (erstes Video-Paket pts), Tonspur endet nic
 erstes und letztes Bild nicht schwarz (mittlere Helligkeit Y > 16) und kein Helligkeitssturz am Rand: das letzte Bild hat
 mindestens 60 % der Helligkeit der 5 Bilder davor, das erste mindestens 60 % der 5 danach (15.10.2026: Fassung 6 hatte 1 Zusatzbild
 mit Helligkeit 31 hinter Bildern mit 129, die Schwelle 16 ließ es durch).
-Titelbild (Nico 15.10.2026 18:13: Titelbild als erstes Bild für die WhatsApp-Vorschau): mit --titelbild COVER.jpg darf Bild 0 das
+Titelbild (the user 15.10.2026 18:13: Titelbild als erstes Bild für die WhatsApp-Vorschau): mit --titelbild COVER.jpg darf Bild 0 das
 Titelbild sein. Bedingung: Bild 0 weicht im Mittel höchstens 6 Graustufen vom Titelbild ab, hat Helligkeit >= 60 und Inhalt
 (Standardabweichung >= 30). Dann gilt der Sturz-Test am Anfang ab Bild 2 (erstes reines Videobild, Bild 1 ist die Überblendung).
 Ein schwarzes oder leeres Bild 0 fällt weiterhin durch, weil es nicht dem Titelbild entspricht."""

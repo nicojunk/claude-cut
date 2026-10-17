@@ -4,7 +4,7 @@ Aufruf: python3 montiere_take.py auswahl.json take.mp4
 auswahl.json: [{"clip": "aufnahme-31.mov", "von": 19.54, "bis": 24.44, "satz": "..."}, ...] (Sekunden aus woerter.json)
 
 Jede Grenze wird innerhalb von ±0,18 s auf das leiseste 20-ms-Fenster gelegt (kein angeschnittenes Wort).
-Bild: 2160x3840 -> 1080x1920, 30 fps, jedes Stück mit setpts=PTS-STARTPTS, Ton je Stück entrauscht (afftdn, gleicher Grundpegel über alle Clips, Nico 15.10.: Ton beim Szenenwechsel), 30 ms Ein-/Ausblendung,
+Bild: 2160x3840 -> 1080x1920, 30 fps, jedes Stück mit setpts=PTS-STARTPTS, Ton je Stück entrauscht (afftdn, gleicher Grundpegel über alle Clips, the user 15.10.: Ton beim Szenenwechsel), 30 ms Ein-/Ausblendung,
 optional "crop" und "stil": "rueckblende" für das Querformat-Interview, Lautheit auf -18 LUFS angehoben, Ton nie länger als Bild (aresample + atrim auf Bildlänge), Kodierung ohne B-Frames (-bf 0)."""
 import json, subprocess, sys
 from pathlib import Path
@@ -38,7 +38,7 @@ def leiseste(a, t, r=0.18, fenster=0.02):
 auswahl = json.load(open(sys.argv[1]))
 ziel = sys.argv[2]
 cache, stuecke = {}, []
-# Nähte am Ton (Nico 15.10.2026 01:32 "da stimmt was nicht", Advisor): jede Grenze liegt in einer gemessenen Pause,
+# Nähte am Ton (the user 15.10.2026 01:32 "da stimmt was nicht", Advisor): jede Grenze liegt in einer gemessenen Pause,
 # nie in einem Wort; Pause < 200 ms = Schnitt mitten im Satz -> Warnung
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import naehte
@@ -139,7 +139,7 @@ for w in warn:
 if warn and '--trotzdem' not in sys.argv:
     sys.exit('Abbruch: Naht mitten im Satz. Andere Grenze wählen oder --trotzdem.')
 
-# Rauschminderung je Clip (15.10.2026 19:00, Nico 18:15 "dieses Zischen"): nf=-30 fest hielt die Stimme über 1 kHz für Rauschen
+# Rauschminderung je Clip (15.10.2026 19:00, the user 18:15 "dieses Zischen"): nf=-30 fest hielt die Stimme über 1 kHz für Rauschen
 # (-7 bis -13 dB, dumpf), jetzt je Clip kalibriert in entrauschen.py (Stimme 1-10 kHz höchstens -1 dB), gespeichert in entrauschen.json
 import entrauschen
 NF = {c: entrauschen.nf_fuer(c, [(v, b) for cc, v, b in stuecke if cc == c]) for c in {c for c, _, _ in stuecke}}

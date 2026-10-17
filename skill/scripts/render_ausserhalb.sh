@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Render a HyperFrames project with its work folder OUTSIDE iCloud, then move only the finished file to the target.
-# Why (Nico's decision 16.10.2026, memory project-icloud-renderlast-2026-10-16): hyperframes always puts its ~1,900
+# Why (the user's decision 16.10.2026, memory project-icloud-renderlast-2026-10-16): hyperframes always puts its ~1,900
 # captured frames next to --output. Inside the iCloud Desktop one render cost the iCloud daemons 101.5 s CPU,
 # outside 3.4 s; copying the finished MP4 back costs 3.6 s. Render time is the same either way.
 # Usage, from inside projekt/:  zsh <skill>/scripts/render_ausserhalb.sh ../render-roh.mp4 --quality looks --fps 30

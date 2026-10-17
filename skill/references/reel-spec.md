@@ -22,11 +22,11 @@ One file per reel, in the reel folder. `plan_bauen.py` turns it into the montage
    {"clip": "aufnahme-31.mov", "von": 95.0, "bis": 123.0, "satz": "…"}
  ],
  "nutzen_bei": "Der Unterschied",            // first words of the benefit sentence; must start by second 15 of the reel
- "rollen": {"key": ["Wirkung"], "accent": ["Stimmt"]},   // caption roles beyond the automatic ones (see below)
+ "rollen": {"key": ["Unterschied"], "accent": ["Stimmt"]},   // caption roles beyond the automatic ones (see below)
  "fix": {"Ober -Grenz -Wert": "Obergrenz-Wert"},      // caption corrections, see below
  "takte": [ … ],                            // beats, see below
  "varianten": {
-   "mit":  {"stuecke": [ … ], "aufruf": {"bei": "schreib", "lead": "Kommentiere", "keyword": "WIRKUNG"}, "takte": [ … ]},
+   "mit":  {"stuecke": [ … ], "aufruf": {"bei": "schreib", "lead": "Kommentiere", "keyword": "PLAN"}, "takte": [ … ]},
    "ohne": {"stuecke": [ … ], "aufruf": {"bei": "Link", "lead": "Link in der", "keyword": "BIO"}, "takte": [ … ]}
  },
  "titelbild": {"zeit": 3.9, "zeile1": "Mensch oder KI", "zeile2": "Hör genau hin", "vorlage": "46 Gegenüberstellung"},   // "vorlage" REQUIRED, a number 1 to 50 from hook-vorlagen.md (clip.py abliefern stops otherwise)
@@ -34,7 +34,7 @@ One file per reel, in the reel folder. `plan_bauen.py` turns it into the montage
  "assets": ["media/b_mikro.jpg"],           // images used by B-roll segments or image cards, relative to the reel folder
  "plan": {"scale": 1.12},                   // optional overrides of the profile's plan defaults
  "keep_pauses": [], "weg": [], "hero_punch": [],          // rarely needed, see below
- "stopp_freigabe": []                       // only on Nico's explicit decision, see below
+ "stopp_freigabe": []                       // only on the user's explicit decision, see below
 }
 ```
 
@@ -79,7 +79,7 @@ Each beat starts at a word of the creator and can switch the picture, show a car
 ### Caption corrections (`fix`)
 Keys are the tokens as Whisper wrote them (space separated), values the caption text. Same number of words on both sides:
 word for word (`"Zoom Kohl": "Zoom Call"`); fewer words on the right: the tokens join into one caption word.
-Fragments starting with `-` or `.` join the word before automatically ("7 -Tage -Challenge" becomes "7-Tage-Challenge",
+Fragments starting with `-` or `.` join the word before automatically ("3 -Wochen -Plan" becomes "3-Wochen-Plan",
 "26 .10." becomes "26.10."), no `fix` needed. `fix` changes captions only; the audio stays as recorded.
 
 ### Caption roles
@@ -94,11 +94,11 @@ always go (a breath before a seam). `hero_punch`: word indices with a mini flash
 within 6 frames of a card entrance). `woerter-korrektur.json` in a version folder: hand-measured word starts
 `[{"wort": "Hör", "s": 3.767, "e": 3.973, "beleg": "Hüllkurve …"}]`, applied by the alignment; then
 `clip.py bauen <reel> <v> --ab plan`.
-`stopp_freigabe`: `[{"wort": "…", "clip": "IMG_….MOV", "sekunde": 12.3, "von": "Nico", "datum": "2026-10-17",
-"beleg": "rechtliche Prüfung …"}]` lets exactly this stop hit through and names it in the plan output. Only Nico enters it,
+`stopp_freigabe`: `[{"wort": "…", "clip": "IMG_….MOV", "sekunde": 12.3, "von": "the user", "datum": "2026-10-17",
+"beleg": "rechtliche Prüfung …"}]` lets exactly this stop hit through and names it in the plan output. Only the user enters it,
 after a legal check or his explicit decision; never to get a build through.
 
 ## Exit codes of plan_bauen.py
 - 2: a rule is broken; the message names it and what to change (anchor not found, afterglow too short, fewer than
   2 dopamine hits, a card without drop-off entry, `nutzen_bei` missing).
-- 3: compliance stop; `STOPP.md` in the version folder lists the words, the rule and the raw clip second. Report to Nico.
+- 3: compliance stop; `STOPP.md` in the version folder lists the words, the rule and the raw clip second. Report to the user.

@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="#the-gates"><img alt="gates" src="https://img.shields.io/badge/blocking_gates-17-d57255?style=flat-square"></a>
-  <a href="#every-failure-becomes-a-gate"><img alt="pitfalls" src="https://img.shields.io/badge/documented_failures-91-d57255?style=flat-square"></a>
+  <a href="#every-failure-becomes-a-gate"><img alt="pitfalls" src="https://img.shields.io/badge/documented_failures-99-d57255?style=flat-square"></a>
   <a href="#regression"><img alt="regression" src="https://img.shields.io/badge/regression-8_delivered_reels-555?style=flat-square"></a>
   <a href="#hooks"><img alt="hooks" src="https://img.shields.io/badge/hook_templates-50-555?style=flat-square"></a>
   <img alt="license" src="https://img.shields.io/badge/license-MIT-555?style=flat-square">
@@ -28,12 +28,34 @@ delivers two versions, **with and without a comment keyword**, plus a cover with
 The machine does about 95 % of the job. The last 5 % stay human: the eye for "premium" and
 the decision what gets posted.
 
-```bash
-cp -r skill ~/.claude/skills/smm-clipping
-cd ~/.claude/skills/smm-clipping
-python3 scripts/clip.py umgebung        # checks every tool and model, prints what is missing
-python3 scripts/clip.py alles <reel-folder>
-```
+## Quick start
+
+You need a Mac with Apple silicon, about 20 GB of free disk space and
+[Claude Code](https://claude.com/claude-code). No prior knowledge: Claude reads the skill and does the steps, you answer and look.
+
+1. **Install the skill**
+   ```bash
+   git clone https://github.com/nicojunk/claude-cut.git
+   cp -r claude-cut/skill ~/.claude/skills/smm-clipping
+   ```
+2. **Check the machine.** In Claude Code say *"Prüfe die Umgebung für SMM Clipping"*, or run
+   `python3 ~/.claude/skills/smm-clipping/scripts/clip.py umgebung`. It lists every missing tool or model with its install
+   command. Install and run it again until it prints `UMGEBUNG VOLLSTÄNDIG`.
+3. **Settings.** Copy `skill/kanaele/config-vorlage.json` to `~/.config/smm-clipping/config.json`. Keep the render folder
+   outside iCloud (`~/Renders`).
+4. **Set up your channel once (about 15 minutes).** Say *"Richte einen neuen Kanal ein: Name, Thema, Kommentarwort"* and give
+   Claude your brand colours and fonts, or one finished reel as a reference. Claude fills the profile from
+   `skill/kanaele/vorlage.json` and checks the contrast rules (`kanal.py pruefen`). You decide the call to action and the
+   words the creator must never say on camera.
+5. **Make a reel.** Put the raw iPhone recordings in the folder named in the profile and say *"Mach aus IMG_1234.MOV ein
+   Reel zum Thema …, Kommentarwort …"*. Claude transcribes, picks the hook from the 50 templates, builds both versions, runs
+   every gate and puts the finished files on the desktop.
+6. **Look** at `vorschau-handy.mp4` on your phone. Posting is your decision; the skill never posts or sends anything.
+
+**Same quality for everyone.** The result does not depend on how well you prompt: every step that decides quality is a
+script with an exit code (the gates below). If one fails, the build stops and says what to fix. What differs between
+channels is only what the profile gives: colours, fonts, call to action and the explainer cards. This public version
+ships the generic cards; cards for one channel are built per channel (`skill/references/card-catalog.md`).
 
 ---
 
@@ -49,6 +71,18 @@ python3 scripts/clip.py alles <reel-folder>
 
 Picture starts at 0.000 s in every file. Audio is -14 LUFS with true peak below -1.5 dBTP,
 measured on the delivered file, not on the master.
+
+## Time per reel
+
+Measured on a MacBook Pro with Apple M5 Pro:
+
+| | One reel | Reel pair (with and without keyword) |
+|---|---|---|
+| From the request to the finished files (17.10.2026) | 51 min | 83 min |
+| Machine time of the current version (18.10.2026) | 15 min | 38 min |
+
+The difference is Claude reading the material and choosing hook, pieces and cards. Transcribing new raw material comes
+on top (once per recording).
 
 ## How it works
 
@@ -103,7 +137,7 @@ Examples of what got caught this way, all now blocked by a script:
 
 ## Every failure becomes a gate
 
-[`skill/references/pitfalls.md`](skill/references/pitfalls.md) records 91 failures with the
+[`skill/references/pitfalls.md`](skill/references/pitfalls.md) records 99 failures with the
 measured values, the cause and the fix. The rule behind it: a rule that only exists as text
 will be ignored at some point. A script with an exit code will not.
 
@@ -144,16 +178,12 @@ limits.
 
 ## Known limits
 
-Measured by the last independent inspection (two validation reels, 102 and 158 words):
-
-- Captions of a word that follows the previous one without a pause can appear 140 to 230 ms after the audible start
-  when the word begins with a vowel or a soft consonant. That was 2 of 102 and 6 of 158 words; the limit is 120 ms.
-  The aligner finds the consonant, the ear hears the vowel change before it.
-- A false start in the raw recording (a sentence begun, dropped and started again) is not detected. Choose the hook
-  start after it.
-- A seam can still touch the end of a breath (measured 13.9 dB over the room floor, 47 ms).
-
-Everything else in those reels passed: cuts, loudness, true peak, black start, cards, flashes, zoom, channel rules.
+- Two fricatives across a word boundary (a word ending in "-sch" before a word starting with "f", "s" or "v") have no
+  separable boundary; such words keep the aligner's start. In the test reels they stayed inside the limits.
+- If Whisper merges a false start or a repetition into one stretched word, the hook gate stops and asks to re-transcribe
+  that span without context. Correcting the transcript is a manual step.
+- Measured against the word onsets of the last independent inspection (211 words): 0 captions later than 120 ms and 0
+  earlier than 250 ms; before the last round it was 11.
 
 ## Layout
 

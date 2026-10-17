@@ -18,7 +18,18 @@ raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(D / 'take.mp4'), '-vn',
                      capture_output=True, check=True).stdout
 take = np.frombuffer(raw, np.float32).reshape(-1, 2).copy()
 WT = json.loads((D / 'woerter.json').read_text())
-masken = sorted((max(0.0, w['s'] - 0.05), w['e'] + 0.10) for w in WT)
+# Runde 6 (17.10.2026, Abnahme Fall 1 B3 "Naht schneidet ein Atemgeräusch ab"): die Absenkung endete 50 ms vor einer Montage-Naht,
+# weil die Maske des ersten Worts im nächsten Stück über die Naht zurückreichte; der ungesenkte Raumton davor stieg bis an den
+# Schnitt (+14 dB über der gesenkten Pause). Jetzt bleibt jede Maske in ihrem Stück, und eine Lücke mit Naht wird bis an die
+# Naht gesenkt und dahinter neu angesetzt (die Naht selbst hat Aus- und Einblende).
+_ST = json.loads((D / 'take.stuecke.json').read_text()) if (D / 'take.stuecke.json').exists() else []
+naehte, _t = [], 0.0
+for _s in _ST:
+    naehte.append(_t); _t += _s['bis'] - _s['von'] + _s.get('stille_danach', 0)
+def _stueck_anfang(w):
+    k = w.get('stueck')
+    return naehte[k] if isinstance(k, int) and 0 <= k < len(naehte) else 0.0
+masken = sorted((max(0.0, w['s'] - 0.05, _stueck_anfang(w)), w['e'] + 0.10) for w in WT)
 zus = []
 for a0, a1 in masken:
     if zus and a0 <= zus[-1][1]:
@@ -28,22 +39,29 @@ for a0, a1 in masken:
 gain = np.ones(len(take), np.float32); tief = 10 ** (PAUSE_DB / 20); luecken = []
 ende = len(take) / SR
 grenzen = [[0.0, 0.0]] + zus + [[ende, ende]]
-def senken(l0, l1):
+def senken(l0, l1, rampe_vorn=True, rampe_hinten=True):
     i0, i1, r = int(l0 * SR), min(len(take), int(l1 * SR)), int(RAMPE * SR)
-    if i1 - i0 < 2 * r:
+    if i1 - i0 < (rampe_vorn + rampe_hinten) * r + 1:
         return False
     seg = np.full(i1 - i0, tief, np.float32)
     k = np.linspace(0, np.pi, r)
-    if l0 > 0:
+    if l0 > 0 and rampe_vorn:
         seg[:r] = tief + (1 - tief) * (np.cos(k) + 1) / 2
-    if l1 < ende:
+    if l1 < ende and rampe_hinten:
         seg[-r:] = tief + (1 - tief) * (1 - np.cos(k)) / 2
     gain[i0:i1] = np.minimum(gain[i0:i1], seg)
     return True
 
 
 for (_, l0), (l1, _) in zip(grenzen, grenzen[1:]):
-    if l1 - l0 >= 0.12 and senken(l0, l1):
+    drin = [n_ for n_ in naehte if l0 + 0.005 < n_ < l1 - 0.005]
+    if drin:                                   # bis an die Naht senken, dahinter neu ansetzen
+        n_ = drin[0]
+        a_ = senken(l0, n_, rampe_hinten=False) if n_ - l0 >= 0.06 else False
+        b_ = senken(n_, l1, rampe_vorn=False) if l1 - n_ >= 0.06 else False
+        if a_ or b_:
+            luecken.append(round(l1 - l0, 2))
+    elif l1 - l0 >= 0.12 and senken(l0, l1):
         luecken.append(round(l1 - l0, 2))
 take *= gain[:, None]
 wav = D / 'take-ton.wav'

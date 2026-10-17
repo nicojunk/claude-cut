@@ -11,7 +11,7 @@ folder and never travel with the skill.
 Never from memory. In this order:
 1. The channel's design system (tokens with measured sources).
 2. A reel or post the channel published, measured (colour picker on frames, fonts from the export).
-3. Ask Nico for the brand kit. Write the source into `quelle_marke`.
+3. Ask the user for the brand kit. Write the source into `quelle_marke`.
 
 ## Fields
 
@@ -75,7 +75,7 @@ Write each forbidden thing as a regex with its reason. They run four times: on a
 listed with seconds in the material report), on the source span of every clip a reel uses (`plan_bauen.py auswahl`: a hit
 between the first and the last used second stops the reel even when the chosen pieces skip it, because skipping it is
 cutting it out), on the words of the montage (`plan_bauen.py plan`) and on every card text and caption (`baue_reel.py`).
-A stop means: exit 3, `STOPP.md` with the words and seconds, report to Nico, choose nothing around it. Example of a health channel (Heilmittelwerbegesetz § 10): `injektion\w*`,
+A stop means: exit 3, `STOPP.md` with the words and seconds, report to the user, choose nothing around it. Example of a health channel (Heilmittelwerbegesetz § 10): `injektion\w*`,
 `\bdosi[sz]\w*`, amounts with units, `(alle|jeden) <n> (Tage|Wochen)`, prescription drug and brand names, syringes and
 needles. A recording that names an injection interval must stop, not be cut. The channel's topic word
 itself (a hormone name without product, dose or interval) stays allowed: write the patterns narrowly.

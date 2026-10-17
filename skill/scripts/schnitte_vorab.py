@@ -42,6 +42,45 @@ for typ, c in sorted(schnitte, key=lambda x: x[1]):
         print(f'  {typ:13s} {c:7.3f} s  Stille links {(c - L / 100) * 1000:4.0f} ms, rechts {(Rr / 100 - c) * 1000:4.0f} ms, '
               f'Spitze {sp:6.1f} dB (Schwelle {thr:.1f})' + ('' if ok else '  <-- ANGESCHNITTEN'))
 print(f'{d}: {len(schnitte)} Schnitte, {schlecht} angeschnitten, Dauer {len(a) / 16000:.2f} s')
+# A2 Runde 6 (17.10.2026, Abnahme Fall 1 B3): Atem an einer Naht. Die Abnahme misst gegen den Grund DIESER Stelle (Pausengrund
+#    -61 dBFS), nicht gegen den Grund des ganzen Reels: die letzten 10 ms vor der Naht lagen bei -47,1 dBFS (+13,9 dB), 47 ms Atem
+#    bis an die Naht; A sah das nicht (Schwelle des ganzen Reels). Befund: 10 ms direkt vor oder hinter einem Schnitt mehr als
+#    12 dB über dem Grund der Stelle (5. Perzentil der 10-ms-Blöcke im 2-s-Fenster).
+#    Gemessen auf der Render-Quelle take-ton.mp4 (Pausen abgesenkt, plan_bauen 'render_quelle'): dort steht der Atem im Reel, in
+#    take.mp4 lag er nur 6 dB über dem Grund, in der Lieferung 14 dB.
+atem = 0
+import os
+_q = f'{d}/take-ton.mp4' if os.path.exists(f'{d}/take-ton.mp4') else f'{d}/take.mp4'
+_ta = np.frombuffer(subprocess.run(['ffmpeg', '-v', 'error', '-i', _q, '-vn', '-ac', '1', '-ar', '16000', '-f', 's16le', '-'],
+                                   capture_output=True, check=True).stdout, dtype=np.int16).astype(np.float32) / 32768
+a_r = np.concatenate([_ta[int(round(r0 * 16000)):int(round(r1 * 16000))] for r0, r1 in R])
+_nr = len(a_r) // 160
+db_r = 20 * np.log10(np.sqrt(np.mean(a_r[:_nr * 160].reshape(_nr, 160) ** 2, axis=1) + 1e-12))
+def _rms(x0, x1):
+    seg = a_r[max(0, int(round(x0 * 16000))):max(0, int(round(x1 * 16000)))]
+    return 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-12) if len(seg) else -99.0
+# Befund nur, wenn ein Laut durchgehend in den Schnitt läuft (Abnahme: "47 ms durchgehend laut bis an die Naht"): alle vier
+# 10-ms-Blöcke der letzten 40 ms vor dem Schnitt (oder der ersten 40 ms danach) mehr als 12 dB über dem Grund der Pause davor
+# bzw. danach (leisester 10-ms-Block der 300 ms auf dieser Seite, ohne die 30 ms der Blende; 10. Perzentil lag 2,4 dB zu hoch). Ein reelweiter oder 2-s-Grund lag an den
+# Nähten bis 10 dB daneben (abgesenkte Stille, Blende, Atem im Fenster).
+def _bloecke(x0, n_):
+    return [_rms(x0 + i * 0.010, x0 + (i + 1) * 0.010) for i in range(n_)]
+for typ, c in sorted(schnitte, key=lambda x: x[1]):
+    links = _bloecke(c - 0.040, 4); rechts = _bloecke(c, 4)
+    g_l = min(v for v in _bloecke(c - 0.33, 30) + [0.0] if v > -95); g_r = min(v for v in _bloecke(c + 0.03, 30) + [0.0] if v > -95)
+    if min(links) > g_l + 12 or min(rechts) > g_r + 12:
+        atem += 1
+        seite, bl, g = ('davor', links, g_l) if min(links) > g_l + 12 else ('danach', rechts, g_r)
+        print(f'  {typ:13s} {c:7.3f} s  40 ms {seite} durchgehend {min(bl):6.1f} bis {max(bl):6.1f} dB, Grund der Pause {g:6.1f} dB '
+              f'(+{min(bl) - g:.1f} dB)  <-- ATEM ODER LAUT LÄUFT IN DEN SCHNITT')
+print(f'{d}: {atem} Schnitte mit Atem oder Laut direkt an der Naht')
+schlecht += atem
+# A3 Runde 6 (18.10.2026, the user zu Reel 5: Ende abgehackt nach dem Aufruf): Nachlauf nach dem letzten Laut
+#    des Reels. Reel 5 "mit" hatte 0,21 s, die freigegebenen Reels 0,45 bis 0,53 s. Befund unter 0,40 s.
+_letzt = max([k for k in range(len(db)) if db[k] > thr] or [0])
+nachlauf = len(a) / 16000 - (_letzt + 1) / 100
+print(f'{d}: Nachlauf nach dem letzten Laut {nachlauf:.2f} s (Grenze 0,40 s)' + ('  <-- ENDE ZU KNAPP' if nachlauf < 0.40 else ''))
+schlecht += nachlauf < 0.40
 
 # B Untertitel gegen den hörbaren Einsatz NACH EINER PAUSE (Hüllkurve, unabhängig vom Ausrichtungsmodell; Abnahme R4 v7:
 # "Warum?" 393 ms und "Deine" 295 ms zu spät, 3b sah es nicht). Je Wort: die letzte Pause (mind. 60 ms unter der Sprachschwelle),

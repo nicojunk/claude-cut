@@ -7,7 +7,7 @@ description: "Cut raw talking-head footage of any creator channel (coaches, trai
 
 One raw recording in, one reel pair out: `…-mit-kommentarwort.mp4` and `…-ohne-kommentarwort.mp4` plus the cover, on the
 desktop root, each checked to the frame and the millisecond. The machine does 95 %: story order, edit, captions, cards,
-audio, checks. The last 5 % are Nico's eye ("premium") and the decision what gets posted. Nothing is posted or sent by this
+audio, checks. The last 5 % are the user's eye ("premium") and the decision what gets posted. Nothing is posted or sent by this
 skill.
 
 Why it exists: the four reference reels of 14 to 16.10.2026 took about 24 hours and 8+ inspection rounds each, because every
@@ -20,15 +20,14 @@ lesson was learned live. Those lessons are now code (scripts/) and rules (refere
   `setpts=PTS-STARTPTS`, `-bf 0`, exact frame count; `pruefe_schwarz.py` runs on every delivery file. In the report, one
   sentence per video: "Bild beginnt bei 0,000 s, Prüfung bestanden."
 - **The creator's own words only.** Hook, captions, card texts, numbers: everything comes from the creator's recordings.
-  A number on a card must be spoken in the reel (the build refuses otherwise) or carry a `quelle` that Nico approves.
+  A number on a card must be spoken in the reel (the build refuses otherwise) or carry a `quelle` that the user approves.
   Card texts never fall back to the reference examples for another channel (the build refuses).
 - **Compliance stop.** The channel profile lists what the creator may never say on camera (a health channel: drug names,
   doses, injection intervals under the Heilmittelwerbegesetz). If the chosen material contains it, the build stops with `STOPP.md`.
   Never cut the words out yourself: a cut changes what the person says under their name. Report the exact words with time
-  codes; Nico decides (re-record, choose other material, legal check).
-- **Nothing leaves the machine without Nico.** No posting, no Zernio, no sending to the creator. WhatsApp only on Nico's
-  explicit order and only from `~/.local/share/whatsapp-mcp/outbox/`.
-- **Higgsfield costs Nico's money.** Ledger before and after every run, stop limits, cheapest model first
+  codes; the user decides (re-record, choose other material, legal check).
+- **Nothing leaves the machine without the user.** No posting and no sending to the creator: the skill only writes files.
+- **Higgsfield costs the user's money.** Ledger before and after every run, stop limits, cheapest model first
   (references/broll-higgsfield.md). Never generate a person who could pass for the creator.
 - **Freeze the tool during a round.** Never edit scripts while renders or checks of the current round run (rounds 7, 7b and
   8 of the reference job were lost that way). Collect fixes, apply them between rounds, run the regression
@@ -58,13 +57,13 @@ python3 scripts/clip.py material <kanal> aufnahme-31.mov aufnahme-33.mov
 Converts iPhone HDR with Apple's tonemapper (ffmpeg filters give a yellow cast), checks each clip is a raw take (portrait
 or croppable landscape, no burned-in captions), transcribes every clip once with word times, scans the transcripts for the
 channel's stop words and writes one report per clip, `<arbeitsordner>/material/<clip>.md` (full text, stop hits with
-seconds). A stop hit inside the span a reel would use stops that reel; report it to Nico instead of cutting around it.
+seconds). A stop hit inside the span a reel would use stops that reel; report it to the user instead of cutting around it.
 Raw clips are found by file name in the profile's raw footage folders. Transcripts and caches always go into the channel's
 folders from the profile, also in test runs: they are reused by every later reel of that channel.
 Read the topic words in the text: Whisper mishears technical terms and names (a technical term written as a similar-sounding word). Correct the
 captions with `fix` in reel.json (references/reel-spec.md); the spoken audio stays as recorded.
 
-**When the build stops (exit 3, `STOPP.md`)**, report to Nico in this form and build nothing else from that span:
+**When the build stops (exit 3, `STOPP.md`)**, report to the user in this form and build nothing else from that span:
 ```
 STOPP <Reel>: <Clip> sagt bei <Sekunde> s "<genauer Wortlaut>" (Kanalregel: <Grund>).
 Satz zum Neuaufnehmen: <Clip> <von> bis <bis> s: "<ganzer Satz>".
@@ -82,7 +81,7 @@ Read `references/story-rules.md` first. From the transcripts choose:
   Choose it with `references/hook-vorlagen.md`: read all 50 templates, map the creator's candidate sentences to their
   mechanisms (e.g. "Zwei Menschen trainieren gleich viel, aber nur einer sieht nach drei Monaten etwas." is
   40 "Der eine Unterschied") and name the template in `hook.vorlage`. The hook is a whole sentence that starts at a sentence
-  start: `plan_bauen auswahl` stops on a hook that begins mid-sentence ("dass ..." after a comma, Nico 17.10.2026: "Das ist ja kein richtiges Deutsch"). A story already used as the hook of another
+  start: `plan_bauen auswahl` stops on a hook that begins mid-sentence ("dass ..." after a comma, the user 17.10.2026: "Das ist ja kein richtiges Deutsch"). A story already used as the hook of another
   reel of the channel is not used again.
 - **Lock-in**: the sentence right after the hook decides if the viewer stays: an open question, a contrast, a guess.
 - **Benefit**: the creator's own sentence that says what the viewer gets, starting by second 15 of the finished reel.
@@ -98,7 +97,7 @@ sentence.
 
 Read `references/kallaway-rules.md` and `references/card-catalog.md`. Mark every place where viewers are likely to swipe
 away (hook, lock-in, a term they cannot picture, the end of a thought, before the payoff). Only there goes an animation,
-"nicht einfach willkürlich" (Nico 15.10.2026). At least 2 of them are dopamine hits: an open question, anticipation of at
+"nicht einfach willkürlich" (the user 15.10.2026). At least 2 of them are dopamine hits: an open question, anticipation of at
 least 0.7 s, payoff on the payoff word, a soft sound. Pick the card by the mechanism the moment needs, then fill every
 visible text from the creator's sentence.
 
@@ -157,14 +156,14 @@ python3 scripts/clip.py abliefern <reelordner>
 Cover as frame 0 (WhatsApp and Instagram preview), both versions and the cover to the desktop root as
 `JJJJ-MM-TT-<praefix>-reel<NR>-<thema>-mit-kommentarwort.mp4` / `-ohne-…` / `-cover.jpg`, md5 checked, phone preview.
 
-Report to Nico in 2 to 5 lines (German, real umlauts, no dashes as punctuation): what the reel says in one line, length,
+Report to the user in 2 to 5 lines (German, real umlauts, no dashes as punctuation): what the reel says in one line, length,
 per video "Bild beginnt bei 0,000 s, Prüfung bestanden.", the hints that stand, credits used.
 
 ## Many videos at once (batch)
 
 1. Run `material` for all recordings.
 2. Propose a topic list as one table: per reel the hook sentence (seconds), the lock-in, the benefit sentence, the end,
-   the 2 dopamine hits, any stop-word hit. **One approval from Nico for the whole list**, then autonomous.
+   the 2 dopamine hits, any stop-word hit. **One approval from the user for the whole list**, then autonomous.
 3. Write all reel.json files, then `python3 scripts/clip.py stapel <reel1> <reel2> …`: builds one after another, each
    finished build renders in one of 2 lanes, cover and delivery when `titelbild` is set. Overnight for 30 videos
    (about 15 h). Inspect in batches; a reel that needs a third round goes to the report.

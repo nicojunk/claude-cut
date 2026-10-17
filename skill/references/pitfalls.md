@@ -1,7 +1,7 @@
 # Pitfalls: measured traps and where the fix lives
 
 Each item: what went wrong, how it was measured, what the pipeline does now. Numbers 1 to 40 come from the reference
-production 14 to 16.10.2026 (found by independent inspectors or Nico), 41 onwards from building this skill 17.10.2026.
+production 14 to 16.10.2026 (found by independent inspectors or the user), 41 onwards from building this skill 17.10.2026.
 Read the section that matches a failing check.
 
 ## Audio
@@ -9,7 +9,7 @@ Read the section that matches a failing check.
    25 ms more and trims them after the filter.
 2. **loudnorm makes a ~100 ms pts jump** about 3 s before the end (flush of its lookahead). `asetpts=N/SR/TB` after every
    loudness filter; `ton_pakete.py` blocks any AAC packet != 1024 samples (Apple players insert silence).
-3. **Fixed noise reduction dulled the voice** (nf -30: speech 1 to 13 kHz -7 to -13 dB, heard as "Zischen", Nico 15.10.).
+3. **Fixed noise reduction dulled the voice** (nf -30: speech 1 to 13 kHz -7 to -13 dB, heard as "Zischen", the user 15.10.).
    `entrauschen.py` calibrates nf per raw clip (speech loss <= 1 dB in 1 to 10 kHz), cached per channel with a content key.
 4. **Brighter speech made S-peaks 10 dB louder**: split-band de-esser in mastern.py (crossover 4.8 kHz, compressor on the
    high band, threshold = p80 of HF level in speech, ratio 8, attack 0.5 ms). ffmpeg `deesser` was too weak.
@@ -34,9 +34,9 @@ Read the section that matches a failing check.
     (that one: "Meine" now 63.16 s, the audible onset is 63.19 s, the delivery had 63.27 s).
 11. **A stricter onset threshold (+26 dB) put "Du" 0.63 s late** in a noisy interview opening: use the speech threshold
     sustained 30 ms, never a high fixed level.
-12. **Never move a word start later from the envelope** (aspirated "Kostenfrei": caption 299 ms late). Onset corrections
+12. **Never move a word start later from the envelope** (aspirated "Kostenlos": caption 299 ms late). Onset corrections
     only move earlier; starts inside silence have their own rule.
-13. **First match finds the wrong occurrence** ("Wie" 3.4 s before "Wie klingst"). Use 2-word anchors or "Wort@2".
+13. **First match finds the wrong occurrence** ("Wie" 3.4 s before "Wie fühlst"). Use 2-word anchors or "Wort@2".
 14. **Digits must be spoken words for the aligner**: `zahlwort.py` covers any number, ordinals ("26." → sechsundzwanzigsten),
     dates, decimals, percent, times. The old fixed table (7, 10, 11, 26, 35, 37) failed on every other number.
 15. **Changing montage edges invalidates old word times**: clip.py always re-transcribes and re-aligns after a montage.
@@ -110,7 +110,7 @@ Read the section that matches a failing check.
     The threshold is max(-35 dB, noise floor + 15 dB); a quiet studio keeps -35 dB.
 50. **Loudness jumped +6.2 LU at a seam between two recordings** (probe aufnahme-27.mov to aufnahme-33.mov). The montage matches each
     piece's speech loudness to the median of all pieces (at most ±8 dB); `gain` adds to that.
-51. **Whisper splits compounds and dates** ("7 -Tage -Challenge", "26 .10."): tokens starting with "-" or "." join the
+51. **Whisper splits compounds and dates** ("3 -Wochen -Plan", "26 .10."): tokens starting with "-" or "." join the
     word before automatically.
 52. **A punch-in was not reset on an invisible speaker to speaker change** and the next cut jumped -3.8 % (probe
     52.833 s). Without a visible change (other state, flash, dip) nothing is reset; eigenpruefung calls a zoom change
@@ -132,12 +132,12 @@ Read the section that matches a failing check.
     it. Proved by level curve and spectrum (the voiced vowel near 200 Hz centroid, the noise without periodicity). The
     check now stops at the last cut, needs the take's speech level (p10 + 12 dB) held for 30 ms, and leaves a dip to a
     word whose aligned start lies after it. Still finds the 3 late captions the independent inspection found in the probe.
-59. **The millisecond check judged fragments that are never shown**: "7 -Tage -Challenge" is shown as one caption word,
+59. **The millisecond check judged fragments that are never shown**: "3 -Wochen -Plan" is shown as one caption word,
     the hidden "-Tage" was reported 611 ms early. pruefe_ms 3b only checks words that are in a caption group.
 60. **A caption popping in on a dark B-roll still read as a zoom jump** (0.920 at 16.867 s; no face there, and the
     caption lies in the face band). eigenpruefung measures speaker and B-roll frames again without the caption band
     (rows 440 to 690 of 960, contrast equalised): 1.001. Synthetic jumps of 4 and 6 % still measure 1.04 and 1.06.
-61. **A card turning over read as flicker** (visitenkarte_flip at 36.30 s: edge-on, the dark card is thin and the paper
+61. **A card turning over read as flicker** (karte_flip at 36.30 s: edge-on, the dark card is thin and the paper
     shows for a frame). The build writes the turn's start as `drehung` into edl.json; flimmern.py skips those 13 frames.
 62. **A card stamp landed exactly on a cut** (round 2 case 2, 37.833 and 51.467 s; pruefe_ms read it as a clipped word).
     The aligner had pulled the word start onto the cut, the sound followed the word start, and the "at most 200 ms before
@@ -167,7 +167,7 @@ Read the section that matches a failing check.
     The render's copy of the take gets 8 ms ramps to zero at every range edge.
 69. **A raw clip that starts inside the first word**: the render started hard, the master and the AAC encode turned it
     into a left-channel spike of +0.4 dBTP. The delivery fades in over 10 ms; the missing start of the word is material,
-    `plan_bauen auswahl` names it as a hint for Nico.
+    `plan_bauen auswahl` names it as a hint for the user.
 70. **A card element anchored on the last word before a cut showed for 1 frame** (the "not equal" badge of the premium
     balance). Cards get their end time (`_ende`); late events move inside the card.
 71. **The afterglow check measured on the loudness-matched take** and found a low hum 6 dB over the room floor in one
@@ -193,7 +193,7 @@ Read the section that matches a failing check.
     30 ms after the start of a pause inside its span: `einsatz.pause_im_wort`, band 1 to 7.9 kHz (hum below 1 kHz is not
     speech), at least 250 ms below take p10 + 18 dB, at least 300 ms before the aligned end. A soft word end ("-keit" 18 dB
     under the word's peak) stays above that line in this band; a broadband rule relative to the word's peak would have cut
-    it (R2 "Glaubwürdigkeit."). Tested as a dry run on the final aligned times of the 8 reference versions (no word hit; the
+    it (R2 "Sicherheit."). Tested as a dry run on the final aligned times of the 8 reference versions (no word hit; the
     function runs earlier, on CTC times, so the rebuilt validation case 1 is the real check) and on the validation case
     (only the stretched word). A wider acoustic gate in `pausen_absenken` was tried and dropped: it changed the room tone
     of 13 approved reference pauses.
@@ -229,7 +229,7 @@ Read the section that matches a failing check.
     face positions from snapshots, only from the render.
 86. **Chip text lost its descenders**: the reveal mask `inset(0 ...)` cut the "g" of "genug" at the line box (line height 1).
     The mask now reaches 40 px above and below. Check F finds masks that cut text with a tight line height.
-87. **A hook that began with a subordinate clause** ("dass ...", cut at the pause after a comma). Every gate passed, the independent inspector approved it; Nico heard it:
+87. **A hook that began with a subordinate clause** ("dass ...", cut at the pause after a comma). Every gate passed, the independent inspector approved it; the user heard it:
     "Das ist ja kein richtiges Deutsch." `plan_bauen auswahl` stops when the transcript word before the hook's first audible
     word does not end a sentence. The first word is the first whose END lies behind the hook start (Whisper starts words up
     to 270 ms early: "Zehn" at 14.68 s, audible from 14.95 s). Override only with `"mitten_im_satz": true`.
@@ -239,6 +239,42 @@ Read the section that matches a failing check.
 90. **The empty-card check measured one frame** and called a date card with rolling digits empty (1.8 % content). It now
     takes the fullest of 4 frames over 15 frames, the inspectors' definition of "empty".
 91. **The 50 hook templates were only a sentence in SKILL.md**: reel.json could leave "vorlage" out or name anything
-    (Nico 17.10.2026: "die 50 Vorlagen ... das ist hoffentlich implementiert. Das ist ja die Grundlage für die Texthook").
+    (the user 17.10.2026: "die 50 Vorlagen ... das ist hoffentlich implementiert. Das ist ja die Grundlage für die Texthook").
     `hook_vorlage.py` reads references/hook-vorlagen.md (50 rows, asserted); `plan_bauen auswahl` stops without a valid
     `hook.vorlage`, `clip.py abliefern` without a valid `titelbild.vorlage`, and both log the template's pattern.
+92. **Connected-speech words still 140 to 230 ms late after round 5** (a vowel after "-e", [v] after "wir", and in case 2
+    six words after nasals, fricatives and [h]): the aligner left a gap between two words that in truth
+    already carried the first vowel of the second word, or put a stretched word over the boundary. `anlaut.verbunden` (round
+    6): a gap that starts voiced belongs to the next word; a dip inside the gap ends the onset ([h]: its beginning); else the
+    nearest spectral change (24 bands, >= 5 dB) 50 to 250 ms before. Scored against the inspector's onsets in raw-clip time
+    (workspace `regression/anlaut-fixture.json`, 211 words): 11 violations before, 2 after, none earlier than -250 ms.
+93. **A false start at the clip start was invisible in the transcript**: case 2 began with 0.93 s of murmur, 0.71 s pause,
+    then the sentence. Whisper drew its third word over 0.20 to 1.84 s, so the sentence-start gate saw a clean sentence
+    and the caption showed the sentence once over two attempts. `hook_pruefen` now stops on a hook word that spans a pause of
+    at least 300 ms with sound before and after and is longer than 0.6 s + 80 ms per letter (a 250 ms hesitation inside a
+    0.64 s word passes). Fix: re-transcribe that span without context, correct the channel transcript (backup next to it), start the
+    hook at the full sentence.
+94. **The breath at a seam was a ramp of the pause gating, not a breath in the material**: in the raw clip the end of the
+    piece is flat room tone; `pausen_absenken.py` stopped lowering 50 ms before the seam because the first word mask of the
+    next piece reached back over the seam, so un-lowered room tone rose 14 dB above the lowered pause right into the cut.
+    Masks now stay in their own piece and a gap with a seam is lowered up to the seam.
+95. **The seam check measured the wrong track**: `schnitte_vorab` A measured take.mp4, the reel plays take-ton.mp4 (lowered
+    pauses). A2 (round 6) measures the render source: the last (or first) 40 ms at a cut all more than 12 dB above the
+    quietest 10 ms of the 300 ms on that side. It finds exactly the two inspector findings of round 5 (28.953 s and 29.053 s)
+    and nothing else in three versions; a reel-wide or 2-s floor was up to 10 dB off.
+96. **A flash change stayed on the first word when a pause was 210 ms instead of 233 ms** (case 2 round 6, the first word
+    after a sentence end): the change needs 5 frames before the word plus 2 frames to the previous word end; otherwise it stayed on the word
+    and held the caption 133 ms (schnitte_vorab G stopped the build). Now 4 and then 3 frames are tried: with 4 the hold ends
+    on the word (on time), with 3 it is 33 ms late, below G's 50 ms.
+97. **Moving captions earlier broke an own gate that trusted the aligner**: `pruefe_ms` 3b required 95 % of captions within
+    ±120 ms of the CTC start; with `anlaut.verbunden` the median moved to -61 ms against the model (the model is the late
+    one, round 5 measured it). 3b now checks 95 % at most 120 ms late and every word at most 250 ms early, the limits of the
+    independent inspection.
+98. **The fricative rule of round 4 walked into the previous word**: a word starting with V after a word ending in "-sche" was put on the
+    "-sche" (230 ms early, inspector limit 250). A fricative after a word that ends in a fricative has no separable boundary
+    (the inspection says the same): `anlaut()` now leaves such words alone.
+99. **The reel ended 0.21 s after the last word** (the user 18.10.2026 on reel 5: the end after the call to action felt cut off;
+    case 2 0.24 s): the free end of the last piece snapped 120 ms behind the start of the pause, every approved reel
+    ends 0.45 to 0.53 s after its last sound. `plan_bauen auswahl` now ends the last piece NACHLAUF (0.50 s) after its last
+    sound in the raw clip's silence (a still frame only if speech comes earlier); `schnitte_vorab` A3 stops below 0.40 s
+    (approved reels 0.52 to 0.63 s in the take, reel 5 0.26 s, case 2 0.24 s).
